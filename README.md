@@ -5,8 +5,11 @@ A Sphinx extension for documenting TOML configuration files with embedded direct
 [![Tests](https://github.com/calvingiles/autodoc-toml/actions/workflows/test.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/test.yml)
 [![Lint](https://github.com/calvingiles/autodoc-toml/actions/workflows/lint.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/lint.yml)
 [![Build](https://github.com/calvingiles/autodoc-toml/actions/workflows/build.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/build.yml)
+[![Documentation](https://github.com/calvingiles/autodoc-toml/actions/workflows/docs.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/gh/calvingiles/autodoc-toml/branch/main/graph/badge.svg)](https://codecov.io/gh/calvingiles/autodoc-toml)
 [![Python Versions](https://img.shields.io/pypi/pyversions/sphinx-autodoc-toml.svg)](https://pypi.org/project/sphinx-autodoc-toml/)
+
+📖 [**Read the full documentation**](https://calvingiles.github.io/autodoc-toml/)
 
 ## Overview
 
@@ -129,11 +132,13 @@ This project is in active development. Current status:
 
 - [x] TOML-Doc specification defined
 - [x] Project structure created
-- [ ] Core parser implementation
-- [ ] Sphinx extension directive
-- [ ] Linter tool
-- [ ] Complete test suite
-- [ ] Full documentation
+- [x] Core parser implementation
+- [x] Sphinx extension directive
+- [x] Full documentation (dogfooded!)
+- [x] GitHub Actions CI/CD
+- [ ] Linter tool (implementation in progress)
+- [ ] Comprehensive test suite
+- [ ] PyPI release
 
 ## Contributing
 
