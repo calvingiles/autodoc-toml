@@ -9,7 +9,7 @@ from docutils.statemachine import StringList
 from sphinx.application import Sphinx
 from sphinx.util import logging
 
-from sphinx_autodoc_toml.parser import parse_toml_file
+from sphinx_autodoc_toml.parser import DocComment, parse_toml_file
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ class AutodocTomlDirective(Directive):
 
         return result_nodes
 
-    def _create_section_for_doc_comment(self, doc_comment) -> List[nodes.Node]:
+    def _create_section_for_doc_comment(self, doc_comment: DocComment) -> List[nodes.Node]:
         """
         Create documentation nodes for a single doc-comment.
 
@@ -123,9 +123,7 @@ class AutodocTomlDirective(Directive):
 
             # Use nested_parse to parse the content as reStructuredText
             # This allows Sphinx directives (like .. req:: or .. spec::) to work
-            self.state.nested_parse(
-                content_string_list, self.content_offset, container
-            )
+            self.state.nested_parse(content_string_list, self.content_offset, container)
 
             result.append(container)
 

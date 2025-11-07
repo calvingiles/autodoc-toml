@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 
 
 class DocComment:
@@ -75,7 +75,7 @@ class TomlDocParser:
                 if doc_comment:
                     doc_comments.append(doc_comment)
                     # Skip past the doc-comment and the item it documents
-                    i = doc_comment.line_number + len(doc_comment.content.split('\n')) + 1
+                    i = doc_comment.line_number + len(doc_comment.content.split("\n")) + 1
                 else:
                     i += 1
             else:

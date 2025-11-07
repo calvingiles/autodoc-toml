@@ -1,8 +1,10 @@
 """Tests for the TOML doc-comment parser."""
 
-import pytest
 from pathlib import Path
-from sphinx_autodoc_toml.parser import parse_toml_file, TomlDocParser
+
+import pytest
+
+from sphinx_autodoc_toml.parser import parse_toml_file
 
 
 def test_parse_example_file():
@@ -29,9 +31,7 @@ def test_doc_comment_structure():
     from sphinx_autodoc_toml.parser import DocComment
 
     dc = DocComment(
-        path=["project", "dependencies"],
-        content="This is a test doc-comment",
-        line_number=10
+        path=["project", "dependencies"], content="This is a test doc-comment", line_number=10
     )
 
     assert dc.full_path == "project.dependencies"
