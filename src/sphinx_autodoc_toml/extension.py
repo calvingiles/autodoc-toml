@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
-from docutils.statemachine import StringList
+from docutils.statemachine import ViewList
 from sphinx.application import Sphinx
 from sphinx.util import logging
 
@@ -83,12 +83,14 @@ class AutodocTomlDirective(Directive):
 
         for doc_comment in doc_comments:
             # Create a section for this TOML item
-            section_nodes = self._create_section_for_doc_comment(doc_comment)
+            section_nodes = self._create_section_for_doc_comment(doc_comment, toml_path)
             result_nodes.extend(section_nodes)
 
         return result_nodes
 
-    def _create_section_for_doc_comment(self, doc_comment: DocComment) -> List[nodes.Node]:
+    def _create_section_for_doc_comment(
+        self, doc_comment: DocComment, toml_path: Path
+    ) -> List[nodes.Node]:
         """
         Create documentation nodes for a single doc-comment.
 
@@ -113,33 +115,46 @@ class AutodocTomlDirective(Directive):
 
         # Parse the doc-comment content and insert it into the document
         if doc_comment.content or doc_comment.toml_content:
-            # Build the combined RST content
-            rst_content = []
+            # Build the combined RST content using ViewList for proper source tracking
+            rst_content: ViewList = ViewList()
+            source_name = str(toml_path)
 
-            # Add the doc-comment content
+            # Add the doc-comment content (split into individual lines)
             if doc_comment.content:
-                rst_content.append(doc_comment.content)
+                for i, line in enumerate(doc_comment.content.split("\n")):
+                    rst_content.append(line, source_name, doc_comment.line_number + i)
 
             # Add the collapsible admonition with TOML code
             if doc_comment.toml_content:
-                # Add a blank line before the admonition if there's doc-comment content
+                # Calculate the line offset for the admonition content
+                current_line = doc_comment.line_number
                 if doc_comment.content:
-                    rst_content.append("")
+                    current_line += len(doc_comment.content.split("\n"))
+                    # Add a blank line before the admonition if there's doc-comment content
+                    rst_content.append("", source_name, current_line)
+                    current_line += 1
 
                 # Create the admonition block
-                rst_content.append(".. admonition:: View Configuration")
-                rst_content.append("   :class: dropdown")
-                rst_content.append("")
-                rst_content.append("   .. code-block:: toml")
-                rst_content.append("      :linenos:")
-                rst_content.append("")
+                rst_content.append(".. admonition:: View Configuration", source_name, current_line)
+                current_line += 1
+                rst_content.append("   :class: dropdown", source_name, current_line)
+                current_line += 1
+                rst_content.append("", source_name, current_line)
+                current_line += 1
+                rst_content.append("   .. code-block:: toml", source_name, current_line)
+                current_line += 1
+                rst_content.append("      :linenos:", source_name, current_line)
+                current_line += 1
+                rst_content.append("", source_name, current_line)
+                current_line += 1
 
                 # Add the TOML content with proper indentation
                 for line in doc_comment.toml_content.split("\n"):
-                    rst_content.append(f"      {line}")
+                    rst_content.append(f"      {line}", source_name, current_line)
+                    current_line += 1
 
-            # Create a StringList from the combined content
-            content_string_list = StringList(rst_content)
+            # Use the ViewList (no need to create a separate StringList)
+            content_string_list = rst_content
 
             # Create a container node to hold the parsed content
             container = nodes.container()
@@ -147,7 +162,8 @@ class AutodocTomlDirective(Directive):
 
             # Use nested_parse to parse the content as reStructuredText
             # This allows Sphinx directives (like .. req:: or .. spec::) to work
-            self.state.nested_parse(content_string_list, self.content_offset, container)
+            # Note: We pass 0 as the offset since this is generated content
+            self.state.nested_parse(content_string_list, 0, container)  # type: ignore[arg-type]
 
             result.append(container)
 
