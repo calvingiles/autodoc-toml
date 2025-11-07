@@ -2,13 +2,16 @@
 
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
+
+import tomlkit
+from tomlkit.items import Table
 
 
 class DocComment:
     """Represents a doc-comment block extracted from a TOML file."""
 
-    def __init__(self, path: List[str], content: str, line_number: int):
+    def __init__(self, path: List[str], content: str, line_number: int, toml_content: str = ""):
         """
         Initialize a DocComment.
 
@@ -16,10 +19,12 @@ class DocComment:
             path: The TOML path to the item (e.g., ["project", "dependencies"])
             content: The extracted doc-comment content (without #: markers)
             line_number: The line number where the doc-comment starts
+            toml_content: The actual TOML content for this item
         """
         self.path = path
         self.content = content
         self.line_number = line_number
+        self.toml_content = toml_content
 
     @property
     def full_path(self) -> str:
@@ -54,6 +59,8 @@ class TomlDocParser:
         self.toml_path = toml_path
         self.raw_content = toml_path.read_text()
         self.lines = self.raw_content.splitlines()
+        # Parse with tomlkit to extract actual TOML content
+        self.toml_doc = tomlkit.parse(self.raw_content)
 
     def parse(self) -> List[DocComment]:
         """
@@ -128,9 +135,14 @@ class TomlDocParser:
         if path is None:
             return None
 
+        # Extract the TOML content for this item
+        toml_content = self._extract_toml_content(path)
+
         # Create the DocComment
         content = "\n".join(doc_lines)
-        return DocComment(path=path, content=content, line_number=start_line + 1)
+        return DocComment(
+            path=path, content=content, line_number=start_line + 1, toml_content=toml_content
+        )
 
     def _check_separator_rule(self, doc_start_line: int) -> bool:
         """
@@ -258,6 +270,55 @@ class TomlDocParser:
 
         # No table found, we're at the root level
         return []
+
+    def _extract_toml_content(self, path: List[str]) -> str:
+        """
+        Extract the TOML content for a given path.
+
+        Args:
+            path: The path to the TOML item (e.g., ["project", "dependencies"])
+
+        Returns:
+            The TOML content as a string
+        """
+        if not path:
+            return ""
+
+        # Navigate to the item in the tomlkit document
+        try:
+            current: Any = self.toml_doc
+            # For tables, navigate to the parent and check if it's a table
+            # For keys, navigate to the parent table and get the key
+            for part in path[:-1]:
+                if part in current:
+                    current = current[part]
+                else:
+                    return ""
+
+            # Check if the last part is a key or a table
+            last_part = path[-1]
+            if last_part in current:
+                item = current[last_part]
+                # Check if it's a table or a key-value pair
+                if isinstance(item, (dict, Table)):
+                    # It's a table - serialize its contents
+                    # Create a temporary document with just this table
+                    temp_doc = tomlkit.document()
+                    temp_doc.update(item)
+                    content = tomlkit.dumps(temp_doc).strip()
+                    return content
+                else:
+                    # It's a key-value pair
+                    value_str = tomlkit.dumps({"temp": item}).strip()
+                    # Extract just the value part (after "temp = ")
+                    if "=" in value_str:
+                        value_part = value_str.split("=", 1)[1].strip()
+                        return f"{last_part} = {value_part}"
+                    return ""
+            else:
+                return ""
+        except (KeyError, TypeError):
+            return ""
 
 
 def parse_toml_file(toml_path: Path) -> List[DocComment]:

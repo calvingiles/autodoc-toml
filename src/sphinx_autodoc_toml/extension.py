@@ -98,7 +98,7 @@ class AutodocTomlDirective(Directive):
         Returns:
             List of docutils nodes
         """
-        result = []
+        result: List[nodes.Node] = []
 
         # Create a section header for the TOML path
         if doc_comment.path:
@@ -112,10 +112,34 @@ class AutodocTomlDirective(Directive):
             result.append(rubric)
 
         # Parse the doc-comment content and insert it into the document
-        if doc_comment.content:
-            # Create a StringList from the content
-            content_lines = doc_comment.content.split("\n")
-            content_string_list = StringList(content_lines)
+        if doc_comment.content or doc_comment.toml_content:
+            # Build the combined RST content
+            rst_content = []
+
+            # Add the doc-comment content
+            if doc_comment.content:
+                rst_content.append(doc_comment.content)
+
+            # Add the collapsible admonition with TOML code
+            if doc_comment.toml_content:
+                # Add a blank line before the admonition if there's doc-comment content
+                if doc_comment.content:
+                    rst_content.append("")
+
+                # Create the admonition block
+                rst_content.append(".. admonition:: View Configuration")
+                rst_content.append("   :class: dropdown")
+                rst_content.append("")
+                rst_content.append("   .. code-block:: toml")
+                rst_content.append("      :linenos:")
+                rst_content.append("")
+
+                # Add the TOML content with proper indentation
+                for line in doc_comment.toml_content.split("\n"):
+                    rst_content.append(f"      {line}")
+
+            # Create a StringList from the combined content
+            content_string_list = StringList(rst_content)
 
             # Create a container node to hold the parsed content
             container = nodes.container()
