@@ -1,7 +1,23 @@
+#: Build system configuration for sphinx-autodoc-toml.
+#:
+#: This project uses Hatchling as its build backend, which is a modern
+#: PEP 517-compliant build system that works seamlessly with pyproject.toml.
+#:
+#: .. spec:: The build backend MUST be PEP 517 compliant.
+#:    :id: S_BUILD_001
+#:    :status: implemented
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+#: Project metadata and configuration.
+#:
+#: This section contains the core project metadata including name, version,
+#: and dependencies. The project follows semantic versioning.
+#:
+#: .. spec:: Project version MUST follow semantic versioning (semver).
+#:    :id: S_VERSION_001
+#:    :status: implemented
 [project]
 name = "sphinx-autodoc-toml"
 version = "0.1.0"
@@ -26,11 +42,35 @@ classifiers = [
     "Topic :: Documentation",
     "Topic :: Documentation :: Sphinx",
 ]
+
+#: Runtime dependencies required for the extension to function.
+#:
+#: The extension requires Sphinx for the documentation framework and
+#: tomlkit for parsing TOML files while preserving comments.
+#:
+#: .. req:: Sphinx version MUST be 5.0 or higher for modern directive support.
+#:    :id: R_DEP_001
+#:    :status: open
+#:    :tags: dependencies
+#:
+#: .. req:: tomlkit MUST be used instead of tomllib to preserve comments.
+#:    :id: R_DEP_002
+#:    :status: open
+#:    :tags: dependencies, architecture
 dependencies = [
     "sphinx>=5.0",
     "tomlkit>=0.11.0",
 ]
 
+#: Optional development dependencies for testing and documentation.
+#:
+#: These dependencies are only needed during development and testing,
+#: not for using the extension itself.
+#:
+#: .. req:: All code MUST have test coverage of at least 80%.
+#:    :id: R_TEST_001
+#:    :status: open
+#:    :tags: testing, quality
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
@@ -39,6 +79,15 @@ dev = [
     "types-docutils>=0.20",
 ]
 
+#: Command-line tools provided by this package.
+#:
+#: The toml-doc-lint tool validates and formats TOML files according
+#: to the TOML-Doc specification.
+#:
+#: .. spec:: The linter MUST validate both Separator and Attachment rules.
+#:    :id: S_LINT_001
+#:    :status: planned
+#:    :links: R_DEP_002
 [project.scripts]
 toml-doc-lint = "sphinx_autodoc_toml.linter:main"
 
@@ -47,9 +96,15 @@ Homepage = "https://github.com/calvingiles/autodoc-toml"
 Repository = "https://github.com/calvingiles/autodoc-toml"
 Issues = "https://github.com/calvingiles/autodoc-toml/issues"
 
+#: Hatch wheel build configuration.
+#:
+#: Specifies which packages to include in the wheel distribution.
 [tool.hatch.build.targets.wheel]
 packages = ["src/sphinx_autodoc_toml"]
 
+#: Hatch source distribution configuration.
+#:
+#: Defines which files to include in the source distribution tarball.
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
@@ -59,20 +114,48 @@ include = [
     "/LICENSE",
 ]
 
+#: Pytest test runner configuration.
+#:
+#: Configures how pytest discovers and runs tests.
+#:
+#: .. req:: All tests MUST be located in the tests/ directory.
+#:    :id: R_TEST_002
+#:    :status: implemented
+#:    :tags: testing
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 
+#: Ruff linter configuration.
+#:
+#: Ruff is a fast Python linter that checks code style and quality.
+#:
+#: .. spec:: Line length MUST NOT exceed 100 characters.
+#:    :id: S_STYLE_001
+#:    :status: implemented
+#:    :tags: code-quality
 [tool.ruff]
 line-length = 100
 target-version = "py38"
 
+#: Ruff linting rules selection.
+#:
+#: Enables specific linting rule categories for code quality checks.
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
 ignore = []
 
+#: Coverage.py configuration for measuring test coverage.
+#:
+#: Specifies which source files to measure and which to omit.
+#:
+#: .. req:: Test coverage MUST be measured and reported.
+#:    :id: R_TEST_003
+#:    :status: implemented
+#:    :links: R_TEST_001
+#:    :tags: testing, quality
 [tool.coverage.run]
 source = ["src/sphinx_autodoc_toml"]
 omit = [
@@ -80,6 +163,9 @@ omit = [
     "*/test_*.py",
 ]
 
+#: Coverage reporting configuration.
+#:
+#: Defines which lines to exclude from coverage reports.
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
@@ -91,12 +177,21 @@ exclude_lines = [
     "@abstractmethod",
 ]
 
+#: MyPy static type checker configuration.
+#:
+#: MyPy performs static type checking to catch type-related bugs.
+#:
+#: .. spec:: All function definitions MUST have type annotations.
+#:    :id: S_TYPE_001
+#:    :status: implemented
+#:    :tags: code-quality, types
 [tool.mypy]
 python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 
+#: MyPy overrides for third-party libraries without type stubs.
 [[tool.mypy.overrides]]
 module = ["sphinx.*", "docutils.*"]
 ignore_missing_imports = true
