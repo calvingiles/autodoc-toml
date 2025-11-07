@@ -11,9 +11,7 @@ from tomlkit.items import Table
 class DocComment:
     """Represents a doc-comment block extracted from a TOML file."""
 
-    def __init__(
-        self, path: List[str], content: str, line_number: int, toml_content: str = ""
-    ):
+    def __init__(self, path: List[str], content: str, line_number: int, toml_content: str = ""):
         """
         Initialize a DocComment.
 
