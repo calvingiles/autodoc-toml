@@ -2,6 +2,12 @@
 
 A Sphinx extension for documenting TOML configuration files with embedded directives.
 
+[![Tests](https://github.com/calvingiles/autodoc-toml/actions/workflows/test.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/test.yml)
+[![Lint](https://github.com/calvingiles/autodoc-toml/actions/workflows/lint.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/lint.yml)
+[![Build](https://github.com/calvingiles/autodoc-toml/actions/workflows/build.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/calvingiles/autodoc-toml/branch/main/graph/badge.svg)](https://codecov.io/gh/calvingiles/autodoc-toml)
+[![Python Versions](https://img.shields.io/pypi/pyversions/sphinx-autodoc-toml.svg)](https://pypi.org/project/sphinx-autodoc-toml/)
+
 ## Overview
 
 `sphinx-autodoc-toml` enables you to embed documentation directly within your TOML configuration files (like `pyproject.toml`) using a special doc-comment syntax. This documentation can include Sphinx directives such as `sphinx-needs` requirements and specifications, keeping your configuration and its documentation in sync.
