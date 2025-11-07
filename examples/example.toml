@@ -1,0 +1,82 @@
+# Example TOML file demonstrating the TOML-Doc specification
+# This file shows how to use #: doc-comments to document TOML configuration
+
+[project]
+name = "example-project"
+version = "1.0.0"
+
+# This is a regular comment and will be ignored by sphinx-autodoc-toml
+
+#: Documentation for the project dependencies table.
+#: This section defines all runtime dependencies for the project.
+#:
+#: .. spec:: All dependencies MUST be pinned to specific versions.
+#:    :id: S_DEPS_001
+#:    :status: approved
+[project.dependencies]
+flask = "==3.0.0"
+requests = "==2.31.0"
+
+#: The pytest dependency is used for running the test suite.
+#:
+#: .. req:: Pytest must be version 7 or higher to support modern features.
+#:    :id: R_TEST_001
+#:    :status: open
+#:    :tags: testing
+pytest = ">=7.0.0"
+
+#: Optional development dependencies for code quality and testing.
+[project.optional-dependencies]
+
+#: Linting tools used to maintain code quality.
+#:
+#: .. req:: All code must pass ruff linting before commit.
+#:    :id: R_LINT_001
+lint = ["ruff>=0.1.0", "mypy>=1.0"]
+
+#: Documentation for the hatch build system configuration.
+#: Hatch is used to manage the build, packaging, and versioning of this project.
+#:
+#: .. spec:: All hatch configuration must be tested in CI.
+#:    :id: S_HATCH_001
+#:    :links: R_CI_001
+[hatch]
+
+#: The hatch build configuration specifies how the project is packaged.
+#:
+#: .. note:: We use the wheel target for distribution.
+[hatch.build]
+targets = ["wheel"]
+
+#: The hatch version configuration manages automatic versioning.
+#:
+#: .. spec:: Version must follow semantic versioning (semver).
+#:    :id: S_VER_001
+[hatch.version]
+path = "src/__init__.py"
+
+#: Tool configuration section for various development tools.
+[tool]
+
+#: Pytest configuration defines how tests are discovered and run.
+#:
+#: .. req:: All tests must be in the tests/ directory.
+#:    :id: R_TEST_002
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+#: Ruff linter configuration.
+#:
+#: .. spec:: Line length must not exceed 100 characters.
+#:    :id: S_LINT_002
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+#: Ruff lint rules configuration.
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
