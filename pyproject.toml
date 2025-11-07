@@ -36,6 +36,7 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "sphinx-needs>=1.0",
+    "types-docutils>=0.20",
 ]
 
 [project.scripts]
@@ -72,8 +73,30 @@ target-version = "py38"
 select = ["E", "F", "I", "N", "W", "UP"]
 ignore = []
 
+[tool.coverage.run]
+source = ["src/sphinx_autodoc_toml"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["sphinx.*", "docutils.*"]
+ignore_missing_imports = true
