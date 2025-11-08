@@ -5,6 +5,7 @@ A Sphinx extension for documenting TOML configuration files with embedded direct
 [![Tests](https://github.com/calvingiles/autodoc-toml/actions/workflows/test.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/test.yml)
 [![Lint](https://github.com/calvingiles/autodoc-toml/actions/workflows/lint.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/lint.yml)
 [![Build](https://github.com/calvingiles/autodoc-toml/actions/workflows/build.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/build.yml)
+[![Publish](https://github.com/calvingiles/autodoc-toml/actions/workflows/publish.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/publish.yml)
 [![Documentation](https://github.com/calvingiles/autodoc-toml/actions/workflows/docs.yml/badge.svg)](https://github.com/calvingiles/autodoc-toml/actions/workflows/docs.yml)
 [![codecov](https://codecov.io/gh/calvingiles/autodoc-toml/branch/main/graph/badge.svg)](https://codecov.io/gh/calvingiles/autodoc-toml)
 [![Python Versions](https://img.shields.io/pypi/pyversions/sphinx-autodoc-toml.svg)](https://pypi.org/project/sphinx-autodoc-toml/)
@@ -136,9 +137,10 @@ This project is in active development. Current status:
 - [x] Sphinx extension directive
 - [x] Full documentation (dogfooded!)
 - [x] GitHub Actions CI/CD
+- [x] PyPI deployment workflow
 - [ ] Linter tool (implementation in progress)
 - [ ] Comprehensive test suite
-- [ ] PyPI release
+- [ ] First PyPI release
 
 ## Development
 
@@ -208,6 +210,10 @@ uv sync      # Sync environment with lock file
 ```
 
 The lock file is committed to version control to ensure everyone gets the same dependency versions.
+
+### Releasing
+
+For maintainers: see [RELEASING.md](RELEASING.md) for instructions on publishing releases to PyPI.
 
 ## Contributing
 
