@@ -96,6 +96,82 @@ Homepage = "https://github.com/calvingiles/autodoc-toml"
 Repository = "https://github.com/calvingiles/autodoc-toml"
 Issues = "https://github.com/calvingiles/autodoc-toml/issues"
 
+#: Hatch environment configuration.
+#:
+#: Configure hatch to use uv as the installer for all environments.
+#: This provides faster dependency resolution and installation.
+#:
+#: .. spec:: Package installation MUST use uv for improved performance.
+#:    :id: S_BUILD_002
+#:    :status: implemented
+#:    :tags: tooling, performance
+[tool.hatch.envs.default]
+installer = "uv"
+
+#: Test environment configuration.
+#:
+#: Environment for running tests with pytest and coverage reporting.
+#:
+#: .. req:: All tests MUST be runnable via 'hatch test' command.
+#:    :id: R_TEST_004
+#:    :status: implemented
+#:    :tags: testing, tooling
+[tool.hatch.envs.test]
+dependencies = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "sphinx-needs>=1.0",
+    "types-docutils>=0.20",
+]
+
+[tool.hatch.envs.test.scripts]
+run = "pytest tests/ -v --cov=src/sphinx_autodoc_toml --cov-report=xml --cov-report=term"
+cov = "pytest tests/ -v --cov=src/sphinx_autodoc_toml --cov-report=html --cov-report=term"
+
+#: Lint environment configuration.
+#:
+#: Environment for running code quality checks with ruff and mypy.
+#:
+#: .. spec:: Linting MUST be runnable via 'hatch run lint:all' command.
+#:    :id: S_LINT_002
+#:    :status: implemented
+#:    :tags: code-quality, tooling
+[tool.hatch.envs.lint]
+dependencies = [
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+    "types-docutils>=0.20",
+]
+
+[tool.hatch.envs.lint.scripts]
+check = "ruff check src/ tests/"
+format-check = "ruff format --check src/ tests/"
+format = "ruff format src/ tests/"
+typing = "mypy src/"
+all = [
+    "check",
+    "format-check",
+    "typing",
+]
+
+#: Documentation environment configuration.
+#:
+#: Environment for building documentation with Sphinx.
+#:
+#: .. spec:: Documentation MUST be buildable via 'hatch run docs:build' command.
+#:    :id: S_DOCS_001
+#:    :status: implemented
+#:    :tags: documentation, tooling
+[tool.hatch.envs.docs]
+dependencies = [
+    "sphinx>=5.0",
+    "sphinx-needs>=1.0",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "sphinx-build -b html docs docs/_build/html"
+clean = "rm -rf docs/_build"
+
 #: Hatch wheel build configuration.
 #:
 #: Specifies which packages to include in the wheel distribution.
