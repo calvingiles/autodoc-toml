@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.1.1] - 2025-11-08
+
+### Added
 - Initial Sphinx extension for documenting TOML configuration files
 - `autodoc-toml` directive for embedding TOML documentation in Sphinx docs
 - Support for doc-comments in TOML files (TOML-Doc specification)
@@ -31,4 +45,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-[Unreleased]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.0...v0.1.1
