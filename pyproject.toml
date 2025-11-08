@@ -1,14 +1,23 @@
 #: Build system configuration for sphinx-autodoc-toml.
 #:
-#: This project uses Hatchling as its build backend, which is a modern
-#: PEP 517-compliant build system that works seamlessly with pyproject.toml.
+#: This project uses uv_build as its build backend for significantly faster
+#: builds (10-35x faster than hatchling). uv_build is PEP 517-compliant and
+#: now stable as of late 2024.
 #:
 #: .. spec:: The build backend MUST be PEP 517 compliant.
 #:    :id: S_BUILD_001
 #:    :status: implemented
+#:    :tags: tooling
+#:    :links: R_DX_011
+#:
+#: .. spec:: The build backend SHOULD use uv_build for optimal performance.
+#:    :id: S_BUILD_003
+#:    :status: implemented
+#:    :tags: performance, tooling, developer-experience
+#:    :links: R_DX_010
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.9.6,<0.10.0"]
+build-backend = "uv_build"
 
 #: Project metadata and configuration.
 #:
@@ -96,23 +105,125 @@ Homepage = "https://github.com/calvingiles/autodoc-toml"
 Repository = "https://github.com/calvingiles/autodoc-toml"
 Issues = "https://github.com/calvingiles/autodoc-toml/issues"
 
-#: Hatch wheel build configuration.
+#: Hatch environment configuration.
 #:
-#: Specifies which packages to include in the wheel distribution.
-[tool.hatch.build.targets.wheel]
-packages = ["src/sphinx_autodoc_toml"]
+#: Configure hatch to use uv as the installer for all environments.
+#: This provides faster dependency resolution and installation.
+#:
+#: .. spec:: Package installation MUST use uv for improved performance.
+#:    :id: S_BUILD_002
+#:    :status: implemented
+#:    :tags: tooling, performance, developer-experience
+#:    :links: R_DX_001, R_DX_002
+#:
+#: .. spec:: Dependencies MUST be locked for reproducible builds across environments.
+#:    :id: S_BUILD_005
+#:    :status: implemented
+#:    :tags: tooling, reproducibility, developer-experience
+#:    :links: R_DX_013
+#:
+#: Note: We use uv.lock (via 'uv lock') for dependency locking rather than
+#: hatch-pip-compile. This provides better integration with uv_build backend
+#: and uv's fast resolver, while hatch remains the task runner.
+[tool.hatch.envs.default]
+installer = "uv"
 
-#: Hatch source distribution configuration.
+#: Test environment configuration.
 #:
-#: Defines which files to include in the source distribution tarball.
-[tool.hatch.build.targets.sdist]
-include = [
-    "/src",
-    "/tests",
-    "/examples",
-    "/README.md",
-    "/LICENSE",
+#: Environment for running tests with pytest and coverage reporting.
+#:
+#: .. spec:: Test commands MUST provide clear, actionable output.
+#:    :id: S_DX_001
+#:    :status: implemented
+#:    :tags: developer-experience, testing
+#:    :links: R_TEST_004, R_DX_003, R_DX_004
+[tool.hatch.envs.test]
+dependencies = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "sphinx-needs>=1.0",
+    "types-docutils>=0.20",
 ]
+
+[tool.hatch.envs.test.scripts]
+run = "pytest tests/ -v --cov=src/sphinx_autodoc_toml --cov-report=xml --cov-report=term"
+cov = "pytest tests/ -v --cov=src/sphinx_autodoc_toml --cov-report=html --cov-report=term"
+
+#: Lint environment configuration.
+#:
+#: Environment for running code quality checks with ruff and mypy.
+#:
+#: .. spec:: Linting MUST be runnable via 'hatch run lint:all' command.
+#:    :id: S_LINT_002
+#:    :status: implemented
+#:    :tags: code-quality, tooling, developer-experience
+#:    :links: R_DX_005, R_DX_006
+#:
+#: .. spec:: Code formatting MUST be automated and consistent across the project.
+#:    :id: S_DX_002
+#:    :status: implemented
+#:    :tags: developer-experience, code-quality
+#:    :links: R_DX_007
+[tool.hatch.envs.lint]
+dependencies = [
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+    "types-docutils>=0.20",
+]
+
+[tool.hatch.envs.lint.scripts]
+check = "ruff check src/ tests/"
+format-check = "ruff format --check src/ tests/"
+format = "ruff format src/ tests/"
+typing = "mypy src/"
+all = [
+    "check",
+    "format-check",
+    "typing",
+]
+
+#: Documentation environment configuration.
+#:
+#: Environment for building documentation with Sphinx.
+#:
+#: .. spec:: Documentation MUST be buildable via 'hatch run docs:build' command.
+#:    :id: S_DOCS_001
+#:    :status: implemented
+#:    :tags: documentation, tooling, developer-experience
+#:    :links: R_DX_008, R_DX_009
+#:
+#: .. spec:: Documentation MUST demonstrate dogfooding by using autodoc-toml for its own config.
+#:    :id: S_DX_003
+#:    :status: implemented
+#:    :tags: developer-experience, documentation
+[tool.hatch.envs.docs]
+dependencies = [
+    "sphinx>=5.0",
+    "sphinx-needs>=1.0",
+    "myst-parser>=2.0",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "sphinx-build -b html docs docs/_build/html"
+clean = "rm -rf docs/_build"
+
+#: uv_build configuration.
+#:
+#: The uv_build backend automatically handles src-layout packages.
+#: With the src/sphinx_autodoc_toml/ structure, the package is auto-detected.
+#: By default, uv_build includes pyproject.toml, README, LICENSE, and src/ in sdist.
+#: Tests and examples are automatically included following Python packaging conventions.
+#:
+#: .. spec:: Build configuration MUST include tests in source distribution.
+#:    :id: S_BUILD_004
+#:    :status: implemented
+#:    :tags: packaging
+#:    :links: R_DX_012
+#:
+#: .. spec:: Package layout MUST follow src-layout convention for clarity.
+#:    :id: S_DX_004
+#:    :status: implemented
+#:    :tags: developer-experience, architecture
 
 #: Pytest test runner configuration.
 #:

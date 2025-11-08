@@ -140,6 +140,70 @@ This project is in active development. Current status:
 - [ ] Comprehensive test suite
 - [ ] PyPI release
 
+## Development
+
+This project uses [Hatch](https://hatch.pypa.io/) with [uv](https://docs.astral.sh/uv/) for development workflows.
+
+### Setup
+
+First, install uv and hatch:
+
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install hatch
+uv tool install hatch
+```
+
+### Common Tasks
+
+```bash
+# Run tests
+hatch run test:run
+
+# Run tests with coverage report
+hatch run test:cov
+
+# Run linting checks
+hatch run lint:all
+
+# Run individual lint checks
+hatch run lint:check        # ruff check
+hatch run lint:format-check # ruff format check
+hatch run lint:typing       # mypy type checking
+
+# Format code
+hatch run lint:format
+
+# Build documentation
+hatch run docs:build
+
+# Build package
+hatch build
+```
+
+### Environments
+
+Hatch manages separate environments for different tasks:
+
+- **test**: Testing with pytest and coverage
+- **lint**: Code quality checks with ruff and mypy
+- **docs**: Documentation building with Sphinx
+
+All environments use uv for fast dependency installation.
+
+### Dependency Management
+
+Dependencies are locked in `uv.lock` for reproducible builds:
+
+```bash
+uv lock      # Update lock file with latest compatible versions
+uv sync      # Sync environment with lock file
+```
+
+The lock file is committed to version control to ensure everyone gets the same dependency versions.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
