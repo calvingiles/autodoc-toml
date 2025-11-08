@@ -7,6 +7,7 @@ This page lists all requirements and specifications for the sphinx-autodoc-toml 
    :maxdepth: 2
    :caption: Detailed Requirements:
 
+   requirements/core-features
    requirements/developer-experience
 
 All Requirements
@@ -25,11 +26,19 @@ All Specifications
    :columns: id, title, status, tags
    :style: table
 
-Requirements Flow
------------------
+All Tests
+---------
 
-This diagram shows the relationships between requirements and specifications:
+.. needtable::
+   :types: test
+   :columns: id, title, status, tags
+   :style: table
+
+Requirements Traceability
+--------------------------
+
+This diagram shows the complete traceability chain from requirements through specifications to tests:
 
 .. needflow::
-   :types: req, spec
+   :types: req, spec, test
    :show_link_names:

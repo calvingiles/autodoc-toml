@@ -1,4 +1,65 @@
-"""Core parser for extracting doc-comments from TOML files."""
+"""Core parser for extracting doc-comments from TOML files.
+
+.. spec:: The parser MUST recognize doc-comments marked with #: syntax.
+   :id: S_PARSER_001
+   :status: implemented
+   :tags: parser, syntax
+   :links: R_SPEC_001
+
+.. spec:: The parser MUST validate the Separator Rule for doc-comments.
+   :id: S_PARSER_002
+   :status: implemented
+   :tags: parser, validation
+   :links: R_SPEC_002, R_PARSE_003
+
+.. spec:: The parser MUST validate the Attachment Rule for doc-comments.
+   :id: S_PARSER_003
+   :status: implemented
+   :tags: parser, validation
+   :links: R_SPEC_003, R_PARSE_004
+
+.. spec:: The parser MUST support multi-line doc-comments.
+   :id: S_PARSER_004
+   :status: implemented
+   :tags: parser, syntax
+   :links: R_SPEC_004
+
+.. spec:: The parser MUST use tomlkit to preserve comments and whitespace.
+   :id: S_PARSER_005
+   :status: implemented
+   :tags: parser, toml
+   :links: R_PARSE_001
+
+.. spec:: The parser MUST extract all valid doc-comments from a TOML file.
+   :id: S_PARSER_006
+   :status: implemented
+   :tags: parser, extraction
+   :links: R_PARSE_002
+
+.. spec:: The parser MUST identify and parse TOML table headers.
+   :id: S_PARSER_007
+   :status: implemented
+   :tags: parser, toml
+   :links: R_PARSE_005
+
+.. spec:: The parser MUST identify and parse TOML key-value pairs.
+   :id: S_PARSER_008
+   :status: implemented
+   :tags: parser, toml
+   :links: R_PARSE_005
+
+.. spec:: The parser MUST determine hierarchical TOML paths for items.
+   :id: S_PARSER_009
+   :status: implemented
+   :tags: parser, toml, hierarchy
+   :links: R_PARSE_006
+
+.. spec:: The parser MUST extract TOML content for documented items.
+   :id: S_PARSER_010
+   :status: implemented
+   :tags: parser, extraction
+   :links: R_PARSE_007
+"""
 
 import re
 from pathlib import Path

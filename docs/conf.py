@@ -90,6 +90,13 @@ needs_types = [
         "color": "#FEDCD2",
         "style": "node",
     },
+    {
+        "directive": "test",
+        "title": "Test",
+        "prefix": "T_",
+        "color": "#DCB239",
+        "style": "node",
+    },
 ]
 
 needs_id_regex = "^[A-Z_]+"
