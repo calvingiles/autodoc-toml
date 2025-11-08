@@ -5,12 +5,19 @@ Welcome to the documentation for **sphinx-autodoc-toml**, a Sphinx extension tha
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Guide
 
-   configuration
+   installation
    quickstart
+   configuration
    toml-doc-spec
    api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: For Contributors
+
+   contributing
    requirements
 
 Overview

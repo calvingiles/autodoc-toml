@@ -1,0 +1,233 @@
+# GitHub Actions workflow for publishing to PyPI and TestPyPI.
+#
+# This workflow implements automated package publishing with quality gates
+# and development version support.
+#
+# .. spec:: The publish workflow MUST automatically publish to PyPI on GitHub releases.
+#    :id: S_RELEASE_001
+#    :status: implemented
+#    :tags: release, ci-cd, pypi, automation
+#    :links: R_DX_016
+#
+# When a GitHub Release is published, this workflow builds the package, runs
+# all tests and linters, and publishes to PyPI using trusted publishing.
+#
+# .. spec:: The publish workflow MUST use OIDC-based trusted publishing for PyPI authentication.
+#    :id: S_RELEASE_002
+#    :status: implemented
+#    :tags: security, release, pypi, authentication
+#    :links: R_DX_017
+#
+# Uses pypa/gh-action-pypi-publish with id-token: write permissions to
+# authenticate via OpenID Connect. No long-lived API tokens are used or stored.
+#
+# .. spec:: The publish workflow MUST publish dev versions to TestPyPI on main branch pushes.
+#    :id: S_RELEASE_003
+#    :status: implemented
+#    :tags: testing, release, ci-cd, testpypi
+#    :links: R_DX_018
+#
+# Every push to main triggers publication of a development version to TestPyPI
+# (with continue-on-error: true to avoid blocking on TestPyPI availability).
+#
+# .. spec:: Development version numbers MUST use format {base}.dev{count}+{hash}.
+#    :id: S_RELEASE_004
+#    :status: implemented
+#    :tags: versioning, release, traceability
+#    :links: R_DX_019
+#
+# The version determination step calculates dev versions from git commit count
+# and short hash, enabling traceability to the exact commit.
+#
+# .. spec:: The publish workflow MUST run tests and linters before building packages.
+#    :id: S_RELEASE_005
+#    :status: implemented
+#    :tags: quality, testing, ci-cd, release
+#    :links: R_DX_020
+#
+# The build job runs 'hatch run test:run' and 'hatch run lint:all' before
+# building the package, ensuring quality gates are passed.
+#
+# .. spec:: The publish workflow MUST support manual workflow dispatch.
+#    :id: S_RELEASE_006
+#    :status: implemented
+#    :tags: flexibility, release, manual-trigger
+#    :links: R_DX_021
+#
+# Workflow dispatch allows manual triggering with choice of target (pypi or testpypi),
+# useful for emergency releases or testing the workflow.
+#
+# .. spec:: The publish workflow MUST comment on PRs with TestPyPI installation instructions.
+#    :id: S_RELEASE_007
+#    :status: implemented
+#    :tags: feedback, testing, ci-cd, developer-experience
+#    :links: R_DX_023
+#
+# Uses actions/github-script to automatically comment on PRs associated with
+# commits pushed to main, providing the version number and pip install command.
+
+name: Publish
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Publish target'
+        required: true
+        type: choice
+        options:
+          - testpypi
+          - pypi
+        default: testpypi
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is-prerelease: ${{ steps.version.outputs.is-prerelease }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install hatch
+        run: uv tool install hatch
+
+      - name: Run tests
+        run: uvx hatch run test:run
+
+      - name: Run linters
+        run: uvx hatch run lint:all
+
+      - name: Determine version
+        id: version
+        run: |
+          BASE_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "Base version from pyproject.toml: $BASE_VERSION"
+
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            VERSION="$BASE_VERSION"
+            IS_PRERELEASE="false"
+            echo "Using release version: $VERSION"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            COMMIT_SHORT=$(git rev-parse --short HEAD)
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            VERSION="${BASE_VERSION}.dev${COMMIT_COUNT}+${COMMIT_SHORT}"
+            IS_PRERELEASE="true"
+            echo "Using dev version: $VERSION"
+          else
+            VERSION="$BASE_VERSION"
+            IS_PRERELEASE="false"
+            echo "Using manual dispatch version: $VERSION"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+
+      - name: Update version for dev builds
+        if: github.event_name == 'push'
+        run: |
+          sed -i 's/^version = .*/version = "${{ steps.version.outputs.version }}"/' pyproject.toml
+          echo "Updated pyproject.toml version to: ${{ steps.version.outputs.version }}"
+
+      - name: Build package
+        run: uvx hatch build
+
+      - name: Store distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    if: |
+      (github.event_name == 'release' && github.event.action == 'published') ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/sphinx-autodoc-toml
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-to-testpypi:
+    name: Publish to TestPyPI (Optional)
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi')
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/sphinx-autodoc-toml
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+      - name: Comment on commit
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          script: |
+            const version = '${{ needs.build.outputs.version }}';
+            const message = `🚀 Published development version \`${version}\` to [TestPyPI](https://test.pypi.org/project/sphinx-autodoc-toml/${version}/)
+
+            Install with:
+            \`\`\`bash
+            pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sphinx-autodoc-toml==${version}
+            \`\`\``;
+
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha
+            });
+
+            if (prs.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prs[0].number,
+                body: message
+              });
+            }
