@@ -193,6 +193,17 @@ Hatch manages separate environments for different tasks:
 
 All environments use uv for fast dependency installation.
 
+### Dependency Management
+
+Dependencies are locked in `uv.lock` for reproducible builds:
+
+```bash
+uv lock      # Update lock file with latest compatible versions
+uv sync      # Sync environment with lock file
+```
+
+The lock file is committed to version control to ensure everyone gets the same dependency versions.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.

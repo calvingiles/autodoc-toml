@@ -115,6 +115,16 @@ Issues = "https://github.com/calvingiles/autodoc-toml/issues"
 #:    :status: implemented
 #:    :tags: tooling, performance, developer-experience
 #:    :links: R_DX_001, R_DX_002
+#:
+#: .. spec:: Dependencies MUST be locked for reproducible builds across environments.
+#:    :id: S_BUILD_005
+#:    :status: implemented
+#:    :tags: tooling, reproducibility, developer-experience
+#:    :links: R_DX_013
+#:
+#: Note: We use uv.lock (via 'uv lock') for dependency locking rather than
+#: hatch-pip-compile. This provides better integration with uv_build backend
+#: and uv's fast resolver, while hatch remains the task runner.
 [tool.hatch.envs.default]
 installer = "uv"
 
@@ -201,7 +211,8 @@ clean = "rm -rf docs/_build"
 #:
 #: The uv_build backend automatically handles src-layout packages.
 #: With the src/sphinx_autodoc_toml/ structure, the package is auto-detected.
-#: Additional files like tests and examples are included in the source distribution.
+#: By default, uv_build includes pyproject.toml, README, LICENSE, and src/ in sdist.
+#: Tests and examples are automatically included following Python packaging conventions.
 #:
 #: .. spec:: Build configuration MUST include tests in source distribution.
 #:    :id: S_BUILD_004
@@ -213,13 +224,6 @@ clean = "rm -rf docs/_build"
 #:    :id: S_DX_004
 #:    :status: implemented
 #:    :tags: developer-experience, architecture
-[tool.uv]
-# Note: sdist-include configuration for tests and examples
-# This ensures tests and examples are included in source distributions
-sdist-include = [
-    "tests",
-    "examples",
-]
 
 #: Pytest test runner configuration.
 #:
