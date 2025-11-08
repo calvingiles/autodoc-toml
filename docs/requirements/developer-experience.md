@@ -269,6 +269,79 @@ These requirements are supported by the following specifications:
 - {need}`S_DOCS_001`: Buildable via hatch command (pyproject.toml)
 - {need}`S_LINT_002`: Linting via hatch command (pyproject.toml)
 
+## Package Publishing & Release
+
+```{req} The project MUST support automated publishing to PyPI on stable releases.
+:id: R_DX_016
+:status: implemented
+:tags: developer-experience, release, ci-cd, pypi
+:links: S_RELEASE_001
+```
+
+Automated publishing reduces the manual effort and potential errors in the release process. When a GitHub Release is published, the package should automatically be built, tested, and uploaded to PyPI.
+
+```{req} Package publishing MUST use PyPI Trusted Publishing for security.
+:id: R_DX_017
+:status: implemented
+:tags: developer-experience, security, release, pypi
+:links: S_RELEASE_002
+```
+
+Trusted Publishing (OIDC-based authentication) eliminates the need for long-lived API tokens, improving security. GitHub Actions authenticates directly with PyPI using short-lived tokens that cannot be extracted or reused.
+
+```{req} Development versions MUST be automatically published to TestPyPI on main branch pushes.
+:id: R_DX_018
+:status: implemented
+:tags: developer-experience, testing, release, ci-cd
+:links: S_RELEASE_003
+```
+
+Automatically publishing development versions to TestPyPI allows contributors to test pre-release versions and verify their changes work correctly when installed as a package. This catches packaging issues early.
+
+```{req} Development version numbers MUST include commit count and hash for traceability.
+:id: R_DX_019
+:status: implemented
+:tags: developer-experience, versioning, release
+:links: S_RELEASE_004
+```
+
+Development versions use the format `{base}.dev{count}+{hash}` (e.g., `0.1.0.dev42+a1b2c3d`) to enable tracing each published version back to its exact commit. This helps with debugging and verification.
+
+```{req} The publish workflow MUST run tests and linters before publishing.
+:id: R_DX_020
+:status: implemented
+:tags: developer-experience, quality, release, ci-cd
+:links: S_RELEASE_005
+```
+
+All quality checks (tests, linting, type checking) must pass before a package is published to either PyPI or TestPyPI. This prevents broken or low-quality releases.
+
+```{req} Maintainers SHOULD be able to manually trigger publishing for emergency releases.
+:id: R_DX_021
+:status: implemented
+:tags: developer-experience, release, flexibility
+:links: S_RELEASE_006
+```
+
+A manual workflow dispatch option allows maintainers to publish releases outside the normal automation (e.g., hotfixes, testing the workflow), with the choice of publishing to either PyPI or TestPyPI.
+
+```{req} The release process MUST be fully documented for maintainers.
+:id: R_DX_022
+:status: implemented
+:tags: developer-experience, documentation, release
+```
+
+Complete documentation ensures that any maintainer can execute releases confidently. The RELEASING.md file documents the entire process, including setup of trusted publishing, creating releases, version numbering, and troubleshooting.
+
+```{req} Contributors SHOULD receive immediate feedback when their PR is published to TestPyPI.
+:id: R_DX_023
+:status: implemented
+:tags: developer-experience, testing, ci-cd, feedback
+:links: S_RELEASE_007
+```
+
+When a pull request is merged to main and published to TestPyPI, the workflow should automatically comment on the associated PR with the version number and installation instructions. This enables rapid testing and validation.
+
 ## Future Improvements
 
 1. Implement parallel linting ({need}`R_DX_005`)
@@ -280,9 +353,9 @@ These requirements are supported by the following specifications:
 
 This demonstrates the ideal separation of concerns:
 - **Requirements** (this document): Define WHAT we need from a developer experience perspective
-- **Specifications** (pyproject.toml): Define HOW the system is technically implemented
+- **Specifications** (pyproject.toml, .github/workflows/*.yml): Define HOW the system is technically implemented
 
-Requirements focus on outcomes and user needs, while specifications describe the technical implementation details embedded in the configuration itself.
+Requirements focus on outcomes and user needs, while specifications describe the technical implementation details embedded in the configuration and workflow files themselves.
 
 ## References
 
@@ -290,3 +363,4 @@ Requirements focus on outcomes and user needs, while specifications describe the
 - [uv Documentation](https://docs.astral.sh/uv/)
 - [ruff Documentation](https://docs.astral.sh/ruff/)
 - [pytest Documentation](https://docs.pytest.org/)
+- [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/)

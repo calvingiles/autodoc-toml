@@ -1,3 +1,71 @@
+# GitHub Actions workflow for publishing to PyPI and TestPyPI.
+#
+# This workflow implements automated package publishing with quality gates
+# and development version support.
+#
+# .. spec:: The publish workflow MUST automatically publish to PyPI on GitHub releases.
+#    :id: S_RELEASE_001
+#    :status: implemented
+#    :tags: release, ci-cd, pypi, automation
+#    :links: R_DX_016
+#
+# When a GitHub Release is published, this workflow builds the package, runs
+# all tests and linters, and publishes to PyPI using trusted publishing.
+#
+# .. spec:: The publish workflow MUST use OIDC-based trusted publishing for PyPI authentication.
+#    :id: S_RELEASE_002
+#    :status: implemented
+#    :tags: security, release, pypi, authentication
+#    :links: R_DX_017
+#
+# Uses pypa/gh-action-pypi-publish with id-token: write permissions to
+# authenticate via OpenID Connect. No long-lived API tokens are used or stored.
+#
+# .. spec:: The publish workflow MUST publish dev versions to TestPyPI on main branch pushes.
+#    :id: S_RELEASE_003
+#    :status: implemented
+#    :tags: testing, release, ci-cd, testpypi
+#    :links: R_DX_018
+#
+# Every push to main triggers publication of a development version to TestPyPI
+# (with continue-on-error: true to avoid blocking on TestPyPI availability).
+#
+# .. spec:: Development version numbers MUST use format {base}.dev{count}+{hash}.
+#    :id: S_RELEASE_004
+#    :status: implemented
+#    :tags: versioning, release, traceability
+#    :links: R_DX_019
+#
+# The version determination step calculates dev versions from git commit count
+# and short hash, enabling traceability to the exact commit.
+#
+# .. spec:: The publish workflow MUST run tests and linters before building packages.
+#    :id: S_RELEASE_005
+#    :status: implemented
+#    :tags: quality, testing, ci-cd, release
+#    :links: R_DX_020
+#
+# The build job runs 'hatch run test:run' and 'hatch run lint:all' before
+# building the package, ensuring quality gates are passed.
+#
+# .. spec:: The publish workflow MUST support manual workflow dispatch.
+#    :id: S_RELEASE_006
+#    :status: implemented
+#    :tags: flexibility, release, manual-trigger
+#    :links: R_DX_021
+#
+# Workflow dispatch allows manual triggering with choice of target (pypi or testpypi),
+# useful for emergency releases or testing the workflow.
+#
+# .. spec:: The publish workflow MUST comment on PRs with TestPyPI installation instructions.
+#    :id: S_RELEASE_007
+#    :status: implemented
+#    :tags: feedback, testing, ci-cd, developer-experience
+#    :links: R_DX_023
+#
+# Uses actions/github-script to automatically comment on PRs associated with
+# commits pushed to main, providing the version number and pip install command.
+
 name: Publish
 
 on:
