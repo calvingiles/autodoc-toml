@@ -1,0 +1,216 @@
+# GitHub Actions workflow for automatic release creation.
+#
+# This workflow implements automated GitHub release creation when a release
+# branch is merged to main. It follows the spec-check release process.
+#
+# .. spec:: The release workflow MUST automatically create GitHub releases on release PR merges.
+#    :id: S_RELEASE_008
+#    :status: implemented
+#    :tags: release, ci-cd, automation
+#    :links: R_DX_024
+#
+# When a PR from a release/vX.Y.Z branch is merged to main, this workflow
+# extracts the version from pyproject.toml and release notes from CHANGELOG.md,
+# then creates a GitHub release. The publish.yml workflow then triggers on the
+# release to publish to PyPI.
+#
+# .. spec:: Release notes MUST be extracted from CHANGELOG.md for GitHub releases.
+#    :id: S_RELEASE_009
+#    :status: implemented
+#    :tags: release, documentation, automation
+#    :links: R_DX_025
+#
+# The workflow parses CHANGELOG.md to extract the section for the version being
+# released, which becomes the release notes in the GitHub release.
+
+name: Create Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.2.0)'
+        required: true
+        type: string
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - name: Check if this is a release merge
+        id: check-release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let isRelease = false;
+            let version = '';
+
+            if (context.eventName === 'workflow_dispatch') {
+              isRelease = true;
+              version = '${{ inputs.version }}';
+              console.log(`Manual release requested for version: ${version}`);
+            } else {
+              // Check if the commit message or branch indicates a release
+              const { data: commit } = await github.rest.repos.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.sha
+              });
+
+              const commitMessage = commit.commit.message;
+              console.log(`Commit message: ${commitMessage}`);
+
+              // Check if this is a merge commit from a release branch
+              const releaseBranchMatch = commitMessage.match(/Merge pull request #\d+ from [\w-]+\/release\/v?([\d.]+(?:-[\w.]+)?)/);
+              if (releaseBranchMatch) {
+                isRelease = true;
+                version = releaseBranchMatch[1];
+                console.log(`Detected release merge for version: ${version}`);
+              }
+
+              // Also check if commit message starts with "Release" or "Bump version"
+              const releaseMessageMatch = commitMessage.match(/^(?:Release|Bump version to) v?([\d.]+(?:-[\w.]+)?)/i);
+              if (releaseMessageMatch) {
+                isRelease = true;
+                version = releaseMessageMatch[1];
+                console.log(`Detected release commit for version: ${version}`);
+              }
+            }
+
+            core.setOutput('is-release', isRelease);
+            core.setOutput('version', version);
+
+            if (!isRelease) {
+              console.log('This is not a release commit, skipping release creation');
+            }
+
+      - name: Checkout code
+        if: steps.check-release.outputs.is-release == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify version in pyproject.toml
+        if: steps.check-release.outputs.is-release == 'true'
+        id: verify-version
+        run: |
+          VERSION="${{ steps.check-release.outputs.version }}"
+          PYPROJECT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+
+          echo "Version from detection: $VERSION"
+          echo "Version in pyproject.toml: $PYPROJECT_VERSION"
+
+          if [ "$VERSION" != "$PYPROJECT_VERSION" ]; then
+            echo "::warning::Detected version ($VERSION) does not match pyproject.toml ($PYPROJECT_VERSION)"
+            echo "Using pyproject.toml version: $PYPROJECT_VERSION"
+            VERSION="$PYPROJECT_VERSION"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Extract release notes from CHANGELOG
+        if: steps.check-release.outputs.is-release == 'true'
+        id: changelog
+        run: |
+          VERSION="${{ steps.verify-version.outputs.version }}"
+
+          # Extract the section for this version from CHANGELOG.md
+          # This uses awk to extract content between ## [VERSION] and the next ## heading
+          if [ -f "CHANGELOG.md" ]; then
+            NOTES=$(awk -v version="$VERSION" '
+              /^## \[/ {
+                if (found) exit;
+                if ($0 ~ "\\[" version "\\]") {
+                  found=1;
+                  next;
+                }
+              }
+              found && /^## / { exit }
+              found { print }
+            ' CHANGELOG.md)
+
+            if [ -z "$NOTES" ]; then
+              echo "::warning::No release notes found in CHANGELOG.md for version $VERSION"
+              NOTES="Release version $VERSION"
+            fi
+          else
+            echo "::warning::CHANGELOG.md not found"
+            NOTES="Release version $VERSION"
+          fi
+
+          # Save to file to preserve formatting
+          echo "$NOTES" > release-notes.md
+          echo "Release notes extracted for version $VERSION"
+
+      - name: Check if release exists
+        if: steps.check-release.outputs.is-release == 'true'
+        id: check-existing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.verify-version.outputs.version }}';
+            const tag = `v${version}`;
+
+            try {
+              const { data: release } = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tag
+              });
+
+              console.log(`Release ${tag} already exists:`, release.html_url);
+              core.setOutput('exists', 'true');
+              core.setOutput('release-url', release.html_url);
+            } catch (error) {
+              if (error.status === 404) {
+                console.log(`Release ${tag} does not exist yet`);
+                core.setOutput('exists', 'false');
+              } else {
+                throw error;
+              }
+            }
+
+      - name: Create GitHub Release
+        if: |
+          steps.check-release.outputs.is-release == 'true' &&
+          steps.check-existing.outputs.exists == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const version = '${{ steps.verify-version.outputs.version }}';
+            const tag = `v${version}`;
+            const notes = fs.readFileSync('release-notes.md', 'utf8');
+
+            // Determine if this is a prerelease (contains -, like 1.0.0-alpha.1)
+            const isPrerelease = version.includes('-');
+
+            const { data: release } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `Release ${version}`,
+              body: notes.trim(),
+              draft: false,
+              prerelease: isPrerelease,
+              target_commitish: context.sha
+            });
+
+            console.log(`Created release: ${release.html_url}`);
+            core.summary.addHeading(`Release ${version} Created`);
+            core.summary.addLink('View Release', release.html_url);
+            await core.summary.write();
+
+      - name: Release already exists
+        if: |
+          steps.check-release.outputs.is-release == 'true' &&
+          steps.check-existing.outputs.exists == 'true'
+        run: |
+          echo "::notice::Release already exists: ${{ steps.check-existing.outputs.release-url }}"
