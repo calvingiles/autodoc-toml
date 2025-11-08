@@ -65,6 +65,13 @@
 #
 # Uses actions/github-script to automatically comment on PRs associated with
 # commits pushed to main, providing the version number and pip install command.
+#
+# .. spec:: Actions MUST be pinned to specific commit SHAs for security.
+#    :id: S_RELEASE_011
+#    :status: implemented
+#    :tags: security, supply-chain
+#
+# Actions are pinned to full commit SHAs to prevent supply chain attacks.
 
 name: Publish
 
@@ -84,6 +91,11 @@ on:
           - pypi
         default: testpypi
 
+# Prevent concurrent publishes
+concurrency:
+  group: publish-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Build distribution
@@ -93,12 +105,12 @@ jobs:
       is-prerelease: ${{ steps.version.outputs.is-prerelease }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.7
         with:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@0b4ebda7b3e9b50be764d3e06c2d8c0aa665e703  # v3.2.1
         with:
           enable-cache: true
 
@@ -149,7 +161,7 @@ jobs:
         run: uvx hatch build
 
       - name: Store distribution packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874  # v4.4.0
         with:
           name: python-package-distributions
           path: dist/
@@ -169,13 +181,13 @@ jobs:
 
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
         with:
           name: python-package-distributions
           path: dist/
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@0ab0b79471669eb3a4d647e625009c62f9f3b241  # v1.10.1
 
   publish-to-testpypi:
     name: Publish to TestPyPI (Optional)
@@ -193,23 +205,25 @@ jobs:
 
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
         with:
           name: python-package-distributions
           path: dist/
 
       - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@0ab0b79471669eb3a4d647e625009c62f9f3b241  # v1.10.1
         with:
           repository-url: https://test.pypi.org/legacy/
 
       - name: Comment on commit
         if: github.event_name == 'push'
-        uses: actions/github-script@v7
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         continue-on-error: true
         with:
           script: |
-            const version = '${{ needs.build.outputs.version }}';
+            const version = process.env.VERSION;
             const message = `🚀 Published development version \`${version}\` to [TestPyPI](https://test.pypi.org/project/sphinx-autodoc-toml/${version}/)
 
             Install with:
