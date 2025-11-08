@@ -60,7 +60,7 @@ from textwrap import dedent
 
 import pytest
 
-from sphinx_autodoc_toml.parser import DocComment, TomlDocParser, parse_toml_file
+from sphinx_autodoc_toml.parser import DocComment, parse_toml_file
 
 
 def test_parse_example_file():
@@ -116,7 +116,8 @@ def test_separator_rule_validation():
 
     # Write to temp file
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(valid_toml)
         temp_path = Path(f.name)
 
@@ -134,14 +135,14 @@ def test_separator_rule_validation():
         version = "1.0.0"
     """).strip()
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(invalid_toml)
         temp_path = Path(f.name)
 
     try:
         doc_comments = parse_toml_file(temp_path)
         # Should not extract doc-comment that violates separator rule
-        version_docs = [dc for dc in doc_comments if 'version' in dc.path]
+        version_docs = [dc for dc in doc_comments if "version" in dc.path]
         assert len(version_docs) == 0, "Should not extract doc-comment violating separator rule"
     finally:
         temp_path.unlink()
@@ -161,13 +162,14 @@ def test_attachment_rule_validation():
     """).strip()
 
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(valid_toml)
         temp_path = Path(f.name)
 
     try:
         doc_comments = parse_toml_file(temp_path)
-        version_docs = [dc for dc in doc_comments if 'version' in dc.path]
+        version_docs = [dc for dc in doc_comments if "version" in dc.path]
         assert len(version_docs) > 0, "Should extract attached doc-comment"
     finally:
         temp_path.unlink()
@@ -181,13 +183,13 @@ def test_attachment_rule_validation():
         version = "1.0.0"
     """).strip()
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(invalid_toml)
         temp_path = Path(f.name)
 
     try:
         doc_comments = parse_toml_file(temp_path)
-        version_docs = [dc for dc in doc_comments if 'version' in dc.path]
+        version_docs = [dc for dc in doc_comments if "version" in dc.path]
         assert len(version_docs) == 0, "Should not extract detached doc-comment"
     finally:
         temp_path.unlink()
@@ -208,13 +210,14 @@ def test_multiline_doc_comments():
     """).strip()
 
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(toml_content)
         temp_path = Path(f.name)
 
     try:
         doc_comments = parse_toml_file(temp_path)
-        name_docs = [dc for dc in doc_comments if 'name' in dc.path]
+        name_docs = [dc for dc in doc_comments if "name" in dc.path]
         assert len(name_docs) > 0, "Should extract multi-line doc-comment"
         assert "multi-line" in name_docs[0].content
         assert "multiple lines" in name_docs[0].content
@@ -235,13 +238,14 @@ def test_table_header_parsing():
     """).strip()
 
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(toml_content)
         temp_path = Path(f.name)
 
     try:
         doc_comments = parse_toml_file(temp_path)
-        project_docs = [dc for dc in doc_comments if dc.path == ['project']]
+        project_docs = [dc for dc in doc_comments if dc.path == ["project"]]
         assert len(project_docs) > 0, "Should extract doc-comment for table header"
         assert project_docs[0].toml_path == "[project]"
     finally:
@@ -261,13 +265,14 @@ def test_key_value_parsing():
     """).strip()
 
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(toml_content)
         temp_path = Path(f.name)
 
     try:
         doc_comments = parse_toml_file(temp_path)
-        name_docs = [dc for dc in doc_comments if dc.path == ['project', 'name']]
+        name_docs = [dc for dc in doc_comments if dc.path == ["project", "name"]]
         assert len(name_docs) > 0, "Should extract doc-comment for key-value pair"
     finally:
         temp_path.unlink()
@@ -286,15 +291,16 @@ def test_hierarchical_paths():
     """).strip()
 
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(toml_content)
         temp_path = Path(f.name)
 
     try:
         doc_comments = parse_toml_file(temp_path)
-        nested_docs = [dc for dc in doc_comments if 'tool' in dc.path]
+        nested_docs = [dc for dc in doc_comments if "tool" in dc.path]
         assert len(nested_docs) > 0, "Should extract doc-comment for nested table"
-        assert nested_docs[0].path == ['tool', 'myproject', 'settings']
+        assert nested_docs[0].path == ["tool", "myproject", "settings"]
         assert nested_docs[0].full_path == "tool.myproject.settings"
     finally:
         temp_path.unlink()
@@ -313,13 +319,14 @@ def test_toml_content_extraction():
     """).strip()
 
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(toml_content)
         temp_path = Path(f.name)
 
     try:
         doc_comments = parse_toml_file(temp_path)
-        name_docs = [dc for dc in doc_comments if dc.path == ['project', 'name']]
+        name_docs = [dc for dc in doc_comments if dc.path == ["project", "name"]]
         assert len(name_docs) > 0, "Should extract doc-comment"
         assert name_docs[0].toml_content, "Should extract TOML content"
         assert "test-project" in name_docs[0].toml_content
