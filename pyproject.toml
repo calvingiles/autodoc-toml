@@ -8,22 +8,13 @@
 #:    :id: S_BUILD_001
 #:    :status: implemented
 #:    :tags: tooling
+#:    :links: R_DX_011
 #:
 #: .. spec:: The build backend SHOULD use uv_build for optimal performance.
 #:    :id: S_BUILD_003
 #:    :status: implemented
 #:    :tags: performance, tooling, developer-experience
-#:
-#: .. req:: Package builds MUST complete in under 5 seconds for rapid iteration.
-#:    :id: R_DX_010
-#:    :status: implemented
-#:    :tags: developer-experience, performance, build
-#:    :links: S_BUILD_003
-#:
-#: .. req:: Build errors MUST clearly indicate which file or configuration is problematic.
-#:    :id: R_DX_011
-#:    :status: implemented
-#:    :tags: developer-experience, build, quality
+#:    :links: R_DX_010
 [build-system]
 requires = ["uv_build>=0.9.6,<0.10.0"]
 build-backend = "uv_build"
@@ -119,22 +110,11 @@ Issues = "https://github.com/calvingiles/autodoc-toml/issues"
 #: Configure hatch to use uv as the installer for all environments.
 #: This provides faster dependency resolution and installation.
 #:
-#: .. req:: Development environment setup MUST be simple and well-documented.
-#:    :id: R_DX_001
-#:    :status: implemented
-#:    :tags: developer-experience, documentation
-#:    :links: S_BUILD_002
-#:
 #: .. spec:: Package installation MUST use uv for improved performance.
 #:    :id: S_BUILD_002
 #:    :status: implemented
 #:    :tags: tooling, performance, developer-experience
-#:
-#: .. req:: Dependency installation SHOULD complete in under 10 seconds on average hardware.
-#:    :id: R_DX_002
-#:    :status: implemented
-#:    :tags: developer-experience, performance
-#:    :links: S_BUILD_002
+#:    :links: R_DX_001, R_DX_002
 [tool.hatch.envs.default]
 installer = "uv"
 
@@ -142,27 +122,11 @@ installer = "uv"
 #:
 #: Environment for running tests with pytest and coverage reporting.
 #:
-#: .. req:: All tests MUST be runnable via a single 'hatch run test:run' command.
-#:    :id: R_TEST_004
-#:    :status: implemented
-#:    :tags: testing, tooling, developer-experience
-#:    :links: S_DX_001
-#:
 #: .. spec:: Test commands MUST provide clear, actionable output.
 #:    :id: S_DX_001
 #:    :status: implemented
 #:    :tags: developer-experience, testing
-#:
-#: .. req:: Test suite SHOULD complete in under 30 seconds for rapid feedback.
-#:    :id: R_DX_003
-#:    :status: implemented
-#:    :tags: developer-experience, performance, testing
-#:
-#: .. req:: Test coverage reporting MUST be available both in terminal and HTML formats.
-#:    :id: R_DX_004
-#:    :status: implemented
-#:    :tags: developer-experience, testing, quality
-#:    :links: R_TEST_001
+#:    :links: R_TEST_004, R_DX_003, R_DX_004
 [tool.hatch.envs.test]
 dependencies = [
     "pytest>=7.0",
@@ -183,27 +147,13 @@ cov = "pytest tests/ -v --cov=src/sphinx_autodoc_toml --cov-report=html --cov-re
 #:    :id: S_LINT_002
 #:    :status: implemented
 #:    :tags: code-quality, tooling, developer-experience
-#:
-#: .. req:: All linting tools MUST run in parallel when possible for speed.
-#:    :id: R_DX_005
-#:    :status: open
-#:    :tags: developer-experience, performance, code-quality
-#:
-#: .. req:: Linting errors MUST provide clear explanations and fix suggestions.
-#:    :id: R_DX_006
-#:    :status: implemented
-#:    :tags: developer-experience, code-quality
+#:    :links: R_DX_005, R_DX_006
 #:
 #: .. spec:: Code formatting MUST be automated and consistent across the project.
 #:    :id: S_DX_002
 #:    :status: implemented
 #:    :tags: developer-experience, code-quality
-#:
-#: .. req:: Developers SHOULD be able to auto-fix most linting issues with a single command.
-#:    :id: R_DX_007
-#:    :status: implemented
-#:    :tags: developer-experience, code-quality
-#:    :links: S_DX_002
+#:    :links: R_DX_007
 [tool.hatch.envs.lint]
 dependencies = [
     "ruff>=0.1.0",
@@ -230,16 +180,7 @@ all = [
 #:    :id: S_DOCS_001
 #:    :status: implemented
 #:    :tags: documentation, tooling, developer-experience
-#:
-#: .. req:: Documentation builds MUST fail on warnings to maintain quality.
-#:    :id: R_DX_008
-#:    :status: open
-#:    :tags: developer-experience, documentation, quality
-#:
-#: .. req:: Documentation SHOULD build in under 15 seconds for quick iteration.
-#:    :id: R_DX_009
-#:    :status: open
-#:    :tags: developer-experience, performance, documentation
+#:    :links: R_DX_008, R_DX_009
 #:
 #: .. spec:: Documentation MUST demonstrate dogfooding by using autodoc-toml for its own config.
 #:    :id: S_DX_003
@@ -266,12 +207,7 @@ clean = "rm -rf docs/_build"
 #:    :id: S_BUILD_004
 #:    :status: implemented
 #:    :tags: packaging
-#:
-#: .. req:: Source distributions MUST include all files needed to run tests and build docs.
-#:    :id: R_DX_012
-#:    :status: implemented
-#:    :tags: developer-experience, packaging, quality
-#:    :links: S_BUILD_004
+#:    :links: R_DX_012
 #:
 #: .. spec:: Package layout MUST follow src-layout convention for clarity.
 #:    :id: S_DX_004
