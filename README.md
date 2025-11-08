@@ -154,7 +154,12 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Install hatch
 uv tool install hatch
+
+# Install pre-commit hooks (automatically runs if using Claude Code)
+hatch run setup
 ```
+
+**Note:** If you're using Claude Code, the pre-commit hooks will be automatically installed when you start a session via the SessionStart hook.
 
 ### Common Tasks
 
