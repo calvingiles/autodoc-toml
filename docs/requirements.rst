@@ -3,6 +3,12 @@ Requirements & Specifications
 
 This page lists all requirements and specifications for the sphinx-autodoc-toml project, automatically extracted from our ``pyproject.toml`` file.
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Detailed Requirements:
+
+   requirements/developer-experience
+
 All Requirements
 ----------------
 

@@ -32,6 +32,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_toml",  # Our own extension!
     "sphinx_needs",  # For requirements and specifications
+    "myst_parser",  # For Markdown support
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -92,3 +93,10 @@ needs_types = [
 ]
 
 needs_id_regex = "^[A-Z_]+"
+
+# -- MyST Parser configuration -----------------------------------------------
+
+# Enable parsing of sphinx-needs directives in Markdown
+myst_enable_extensions = [
+    "colon_fence",  # Enable ::: fenced directives
+]
