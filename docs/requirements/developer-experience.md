@@ -14,6 +14,16 @@ Developer experience is a first-class concern for this project. We aim to minimi
 4. **Consistent Workflows**: All common tasks should follow predictable patterns
 5. **Dogfooding**: We use our own tools to ensure they work well
 
+## Project Structure
+
+```{spec} Package layout MUST follow src-layout convention for clarity.
+:id: S_DX_004
+:status: implemented
+:tags: developer-experience, architecture, project-structure
+```
+
+The src-layout (with code in `src/sphinx_autodoc_toml/`) provides clear separation between source code and development files, preventing accidental imports of development code during testing.
+
 ## Environment Setup
 
 ```{req} Development environment setup MUST be simple and well-documented.
@@ -139,6 +149,13 @@ Clear error messages help developers quickly identify and fix issues. The build 
 :status: implemented
 :tags: developer-experience, packaging, quality
 :links: S_BUILD_004
+```
+
+```{spec} Build configuration MUST include tests in source distribution.
+:id: S_BUILD_004
+:status: implemented
+:tags: packaging, build
+:links: R_DX_012
 ```
 
 This ensures that anyone who downloads the source distribution can fully develop and test the package. The specification {need}`S_BUILD_004` implements this requirement.

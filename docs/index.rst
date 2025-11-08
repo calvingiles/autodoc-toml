@@ -7,9 +7,9 @@ Welcome to the documentation for **sphinx-autodoc-toml**, a Sphinx extension tha
    :maxdepth: 2
    :caption: Contents:
 
+   configuration
    quickstart
    toml-doc-spec
-   configuration
    api
    requirements
 

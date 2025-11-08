@@ -93,10 +93,10 @@ dev = [
 #: The toml-doc-lint tool validates and formats TOML files according
 #: to the TOML-Doc specification.
 #:
-#: .. spec:: The linter MUST validate both Separator and Attachment rules.
-#:    :id: S_LINT_001
+#: .. spec:: The linter CLI MUST be accessible via the toml-doc-lint command.
+#:    :id: S_LINT_006
 #:    :status: planned
-#:    :links: R_DEP_002
+#:    :links: R_LINT_001
 [project.scripts]
 toml-doc-lint = "sphinx_autodoc_toml.linter:main"
 
