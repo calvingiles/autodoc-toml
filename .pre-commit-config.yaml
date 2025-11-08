@@ -1,0 +1,66 @@
+# Pre-commit hooks configuration
+# These hooks run the same checks as CI using hatch
+#
+# .. spec:: Pre-commit hooks MUST use the same hatch commands as CI.
+#    :id: S_DX_005
+#    :status: implemented
+#    :tags: developer-experience, ci-cd, git-hooks
+#    :links: R_DX_014
+#
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+# Update hooks: pre-commit autoupdate
+
+repos:
+  # Local hooks that use hatch to run the same commands as CI
+  - repo: local
+    hooks:
+      # Ruff linting - same as 'hatch run lint:check'
+      - id: ruff-check
+        name: ruff check
+        entry: hatch run lint:check
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      # Ruff formatting - same as 'hatch run lint:format-check'
+      - id: ruff-format
+        name: ruff format
+        entry: hatch run lint:format-check
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      # MyPy type checking - same as 'hatch run lint:typing'
+      - id: mypy
+        name: mypy
+        entry: hatch run lint:typing
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+  # Additional useful hooks that don't conflict with hatch workflows
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^tests/fixtures/
+      - id: end-of-file-fixer
+        exclude: ^tests/fixtures/
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: debug-statements
+
+# Configuration
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+
+# Optional: Run tests on pre-push instead of pre-commit (faster commits)
+# To enable, run: pre-commit install --hook-type pre-push
+# Then add this repo with stage: [pre-push]

@@ -125,25 +125,45 @@ Use these standard status values:
 
 ## Code Quality Standards
 
-### Before Committing
+### Pre-commit Hooks
 
-Always run these checks:
+This project uses pre-commit hooks that automatically run checks before each commit. These hooks run the same checks as CI, ensuring issues are caught early.
+
+**Setup (one-time):**
+```bash
+hatch run setup
+```
+
+This installs pre-commit hooks that will automatically run:
+- Ruff linting (`hatch run lint:check`)
+- Ruff formatting (`hatch run lint:format-check`)
+- MyPy type checking (`hatch run lint:typing`)
+- Additional file checks (trailing whitespace, YAML/TOML validation, etc.)
+
+The hooks run automatically before each commit. If they fail, the commit is blocked and you'll see clear error messages.
+
+**Manual execution:**
+```bash
+# Run all pre-commit hooks manually
+pre-commit run --all-files
+```
+
+### Running Checks Manually
+
+While pre-commit hooks will catch most issues, you can also run checks manually:
 
 ```bash
-# Linting
-uv run ruff check src/ tests/
+# All linting checks
+hatch run lint:all
 
-# Formatting
-uv run ruff format src/ tests/
-
-# Type checking
-uv run mypy src/
+# Individual checks
+hatch run lint:check        # Ruff linting
+hatch run lint:format       # Auto-format code
+hatch run lint:typing       # Type checking
 
 # Tests
-uv run pytest tests/ -v
-
-# Coverage
-uv run pytest tests/ --cov=src/sphinx_autodoc_toml --cov-report=term
+hatch run test:run          # Tests with coverage
+hatch run test:cov          # Generate HTML coverage report
 ```
 
 ### Documentation
