@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hatch run setup",
-            "description": "Install pre-commit hooks for local development"
+            "command": "command -v hatch >/dev/null 2>&1 || uv tool install hatch && hatch run setup",
+            "description": "Install hatch and pre-commit hooks for local development"
           }
         ]
       }
