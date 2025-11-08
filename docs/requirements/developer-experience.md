@@ -30,10 +30,19 @@ The src-layout (with code in `src/sphinx_autodoc_toml/`) provides clear separati
 :id: R_DX_001
 :status: implemented
 :tags: developer-experience, documentation
-:links: S_BUILD_002
+:links: S_BUILD_002, S_DX_006
 ```
 
 The project provides clear setup instructions that require only two tools (uv and hatch) to get started. The specification {need}`S_BUILD_002` implements this by using uv for package installation.
+
+```{req} A single command MUST set up the complete development environment.
+:id: R_DX_015
+:status: implemented
+:tags: developer-experience, setup, git-hooks
+:links: S_DX_006
+```
+
+Developers should be able to set up their development environment, including pre-commit hooks, with a single command (`hatch run setup`). This reduces friction and ensures all developers have a consistent environment configured correctly from the start.
 
 ```{req} Dependency installation SHOULD complete in under 10 seconds on average hardware.
 :id: R_DX_002
@@ -74,6 +83,15 @@ Quick test execution enables rapid iteration and test-driven development practic
 Developers can view coverage inline during development (`hatch run test:run`) or generate detailed HTML reports for deeper analysis (`hatch run test:cov`).
 
 ## Code Quality & Linting
+
+```{req} Pre-commit hooks MUST run the same checks as CI to catch issues early.
+:id: R_DX_014
+:status: implemented
+:tags: developer-experience, code-quality, git, ci-cd
+:links: S_DX_005
+```
+
+Pre-commit hooks provide immediate feedback before code is committed, catching issues locally that would otherwise fail in CI. The hooks use the same hatch commands as CI to ensure consistency between local development and continuous integration.
 
 ```{req} All linting tools MUST run in parallel when possible for speed.
 :id: R_DX_005
@@ -174,6 +192,13 @@ Reproducible builds ensure that the same source code produces identical results 
 All development tasks are accessible through simple, memorable commands:
 
 ```bash
+# Initial Setup (one-time)
+hatch run setup             # Install pre-commit hooks
+
+# Pre-commit Hooks (runs automatically before commits)
+pre-commit run --all-files  # Run all hooks manually
+pre-commit install          # Re-install hooks if needed
+
 # Testing
 hatch run test:run          # Run tests with coverage
 hatch run test:cov          # Generate HTML coverage report
@@ -228,27 +253,28 @@ The following developer experience requirements are still in progress:
 
 ## Supporting Specifications
 
-These requirements are supported by the following specifications defined in `pyproject.toml`:
+These requirements are supported by the following specifications:
 
-- {need}`S_BUILD_001`: PEP 517 compliant build backend
-- {need}`S_BUILD_002`: Use uv for package installation
-- {need}`S_BUILD_003`: Use uv_build for optimal performance
-- {need}`S_BUILD_004`: Include tests in source distribution
-- {need}`S_BUILD_005`: Locked dependencies for reproducibility
-- {need}`S_DX_001`: Clear, actionable test output
-- {need}`S_DX_002`: Automated code formatting
-- {need}`S_DX_003`: Dogfooding autodoc-toml
-- {need}`S_DX_004`: Src-layout convention
-- {need}`S_DOCS_001`: Buildable via hatch command
-- {need}`S_LINT_002`: Linting via hatch command
+- {need}`S_BUILD_001`: PEP 517 compliant build backend (pyproject.toml)
+- {need}`S_BUILD_002`: Use uv for package installation (pyproject.toml)
+- {need}`S_BUILD_003`: Use uv_build for optimal performance (pyproject.toml)
+- {need}`S_BUILD_004`: Include tests in source distribution (pyproject.toml)
+- {need}`S_BUILD_005`: Locked dependencies for reproducibility (pyproject.toml)
+- {need}`S_DX_001`: Clear, actionable test output (pyproject.toml)
+- {need}`S_DX_002`: Automated code formatting (pyproject.toml)
+- {need}`S_DX_003`: Dogfooding autodoc-toml (pyproject.toml)
+- {need}`S_DX_004`: Src-layout convention (this document)
+- {need}`S_DX_005`: Pre-commit hooks use hatch commands (.pre-commit-config.yaml)
+- {need}`S_DX_006`: Single setup command for dev environment (pyproject.toml)
+- {need}`S_DOCS_001`: Buildable via hatch command (pyproject.toml)
+- {need}`S_LINT_002`: Linting via hatch command (pyproject.toml)
 
 ## Future Improvements
 
 1. Implement parallel linting ({need}`R_DX_005`)
 2. Add `-W` flag to Sphinx builds to fail on warnings ({need}`R_DX_008`)
 3. Optimize documentation build performance ({need}`R_DX_009`)
-4. Add pre-commit hooks for instant feedback
-5. Consider watch mode for tests and documentation
+4. Consider watch mode for tests and documentation
 
 ## Architecture
 

@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hatch run setup",
+            "description": "Install pre-commit hooks for local development"
+          }
+        ]
+      }
+    ]
+  }
+}

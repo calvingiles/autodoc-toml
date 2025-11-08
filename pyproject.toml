@@ -125,8 +125,21 @@ Issues = "https://github.com/calvingiles/autodoc-toml/issues"
 #: Note: We use uv.lock (via 'uv lock') for dependency locking rather than
 #: hatch-pip-compile. This provides better integration with uv_build backend
 #: and uv's fast resolver, while hatch remains the task runner.
+#: Default environment dependencies and setup scripts.
+#:
+#: .. spec:: A single 'hatch run setup' command MUST configure the complete dev environment.
+#:    :id: S_DX_006
+#:    :status: implemented
+#:    :tags: developer-experience, setup, git-hooks
+#:    :links: R_DX_001, R_DX_015
 [tool.hatch.envs.default]
 installer = "uv"
+dependencies = [
+    "pre-commit>=3.0",
+]
+
+[tool.hatch.envs.default.scripts]
+setup = "pre-commit install"
 
 #: Test environment configuration.
 #:
