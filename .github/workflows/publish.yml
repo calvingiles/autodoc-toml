@@ -110,7 +110,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@0b4ebda7b3e9b50be764d3e06c2d8c0aa665e703  # v3.2.1
+        uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41  # v7.1.2
         with:
           enable-cache: true
 
