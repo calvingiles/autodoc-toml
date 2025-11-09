@@ -1,0 +1,245 @@
+# GitHub Actions workflow for automatic release creation and publishing.
+#
+# This workflow implements the spec-check release process: when a PR labeled
+# 'release' is merged to main, it creates a GitHub release and publishes to PyPI.
+#
+# .. spec:: The release workflow MUST automatically create GitHub releases on release PR merges.
+#    :id: S_RELEASE_008
+#    :status: implemented
+#    :tags: release, ci-cd, automation
+#    :links: R_DX_024
+#
+# .. spec:: Release notes MUST be extracted from CHANGELOG.md for GitHub releases.
+#    :id: S_RELEASE_009
+#    :status: implemented
+#    :tags: release, documentation, automation
+#    :links: R_DX_025
+#
+# .. spec:: Actions MUST be pinned to specific commit SHAs for security.
+#    :id: S_RELEASE_010
+#    :status: implemented
+#    :tags: security, supply-chain
+
+name: Create Release and Publish
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+# Prevent concurrent releases
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release-created: ${{ steps.create.outputs.release-created }}
+      is-prerelease: ${{ steps.version.outputs.is-prerelease }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.7
+
+      - name: Extract version from pyproject.toml
+        id: version
+        run: |
+          VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not extract version from pyproject.toml"
+            exit 1
+          fi
+
+          # Determine if this is a prerelease (contains -, like 1.0.0-alpha.1)
+          if [[ "$VERSION" == *"-"* ]]; then
+            IS_PRERELEASE="true"
+          else
+            IS_PRERELEASE="false"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION (prerelease: $IS_PRERELEASE)"
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Extract the section for this version from CHANGELOG.md
+          if [ -f "CHANGELOG.md" ]; then
+            NOTES=$(awk -v version="$VERSION" '
+              /^## \[/ {
+                if (found) exit;
+                if ($0 ~ "\\[" version "\\]") {
+                  found=1;
+                  next;
+                }
+              }
+              found && /^## / { exit }
+              found { print }
+            ' CHANGELOG.md)
+
+            if [ -z "$NOTES" ]; then
+              echo "::warning::No release notes found in CHANGELOG.md for version $VERSION"
+              NOTES="Release version $VERSION"
+            fi
+          else
+            echo "::warning::CHANGELOG.md not found"
+            NOTES="Release version $VERSION"
+          fi
+
+          # Save to file to preserve formatting
+          echo "$NOTES" > release-notes.md
+          echo "Release notes extracted for version $VERSION"
+
+      - name: Check if release exists
+        id: check-existing
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        with:
+          script: |
+            const version = process.env.VERSION;
+            const tag = `v${version}`;
+
+            try {
+              const { data: release } = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tag
+              });
+
+              console.log(`Release ${tag} already exists:`, release.html_url);
+              return 'true';
+            } catch (error) {
+              if (error.status === 404) {
+                console.log(`Release ${tag} does not exist yet`);
+                return 'false';
+              } else {
+                throw error;
+              }
+            }
+
+      - name: Create GitHub Release
+        id: create
+        if: steps.check-existing.outputs.result == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          IS_PRERELEASE: ${{ steps.version.outputs.is-prerelease }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+            const version = process.env.VERSION;
+            const tag = `v${version}`;
+            const notes = fs.readFileSync('release-notes.md', 'utf8');
+            const isPrerelease = process.env.IS_PRERELEASE === 'true';
+
+            const { data: release } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `Release ${version}`,
+              body: notes.trim(),
+              draft: false,
+              prerelease: isPrerelease,
+              target_commitish: context.sha
+            });
+
+            console.log(`Created release: ${release.html_url}`);
+            core.setOutput('release-created', 'true');
+            core.setOutput('release-url', release.html_url);
+
+            // Comment on the PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `🎉 Release ${version} has been created!\n\n[View Release](${release.html_url})`
+            });
+
+      - name: Skip - release exists
+        if: steps.check-existing.outputs.result == 'true'
+        run: |
+          echo "::notice::Release v${{ steps.version.outputs.version }} already exists"
+          echo "release-created=false" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build distribution
+    needs: create-release
+    if: needs.create-release.outputs.release-created == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41  # v7.1.2
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install hatch
+        run: uv tool install hatch
+
+      - name: Run tests
+        run: uvx hatch run test:run
+
+      - name: Run linters
+        run: uvx hatch run lint:all
+
+      - name: Build package
+        run: uvx hatch build
+
+      - name: Store distribution packages
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874  # v4.4.0
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    needs: [create-release, build]
+    if: needs.create-release.outputs.release-created == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/sphinx-autodoc-toml
+    permissions:
+      id-token: write
+      pull-requests: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@0ab0b79471669eb3a4d647e625009c62f9f3b241  # v1.10.1
+
+      - name: Comment on PR with installation instructions
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        with:
+          script: |
+            const version = '${{ needs.create-release.outputs.version }}';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `📦 Version ${version} has been published to PyPI!\n\nInstall with:\n\`\`\`bash\npip install sphinx-autodoc-toml==${version}\n\`\`\``
+            });
