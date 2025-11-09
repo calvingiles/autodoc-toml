@@ -121,11 +121,11 @@ jobs:
               });
 
               console.log(`Release ${tag} already exists:`, release.html_url);
-              return 'true';
+              return true;
             } catch (error) {
               if (error.status === 404) {
                 console.log(`Release ${tag} does not exist yet`);
-                return 'false';
+                return false;
               } else {
                 throw error;
               }
@@ -133,7 +133,7 @@ jobs:
 
       - name: Create GitHub Release
         id: create
-        if: steps.check-existing.outputs.result == 'false'
+        if: steps.check-existing.outputs.result != true
         env:
           VERSION: ${{ steps.version.outputs.version }}
           IS_PRERELEASE: ${{ steps.version.outputs.is-prerelease }}
@@ -170,10 +170,9 @@ jobs:
             });
 
       - name: Skip - release exists
-        if: steps.check-existing.outputs.result == 'true'
+        if: steps.check-existing.outputs.result == true
         run: |
           echo "::notice::Release v${{ steps.version.outputs.version }} already exists"
-          echo "release-created=false" >> $GITHUB_OUTPUT
 
   build:
     name: Build distribution
