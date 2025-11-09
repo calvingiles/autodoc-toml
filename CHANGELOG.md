@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.5] - 2025-11-09
+
+### Fixed
+- Fixed PyPI versioning policy violation in publish workflow
+- Development versions now use PyPI-compatible format without local version identifiers
+- Release 0.1.4 failed to upload to PyPI due to local version identifier (+commit-hash)
+
 ## [0.1.4] - 2025-11-09
 
 ### Fixed
@@ -65,7 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-[Unreleased]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.1...v0.1.2
