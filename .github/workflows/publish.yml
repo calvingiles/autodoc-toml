@@ -21,14 +21,14 @@
 # Uses pypa/gh-action-pypi-publish with id-token: write permissions to
 # authenticate via OpenID Connect. No long-lived API tokens are used or stored.
 #
-# .. spec:: The publish workflow MUST publish dev versions to TestPyPI on main branch pushes.
+# .. spec:: The publish workflow MUST support publishing to TestPyPI via manual dispatch.
 #    :id: S_RELEASE_003
 #    :status: implemented
 #    :tags: testing, release, ci-cd, testpypi
 #    :links: R_DX_018
 #
-# Every push to main triggers publication of a development version to TestPyPI
-# (with continue-on-error: true to avoid blocking on TestPyPI availability).
+# TestPyPI publishing is available via manual workflow dispatch to avoid blocking
+# PyPI releases if TestPyPI is unavailable or misconfigured.
 #
 # .. spec:: Development version numbers MUST use format {base}.dev{count}+{hash}.
 #    :id: S_RELEASE_004
@@ -56,15 +56,6 @@
 #
 # Workflow dispatch allows manual triggering with choice of target (pypi or testpypi),
 # useful for emergency releases or testing the workflow.
-#
-# .. spec:: The publish workflow MUST comment on PRs with TestPyPI installation instructions.
-#    :id: S_RELEASE_007
-#    :status: implemented
-#    :tags: feedback, testing, ci-cd, developer-experience
-#    :links: R_DX_023
-#
-# Uses actions/github-script to automatically comment on PRs associated with
-# commits pushed to main, providing the version number and pip install command.
 #
 # .. spec:: Actions MUST be pinned to specific commit SHAs for security.
 #    :id: S_RELEASE_011
@@ -191,9 +182,7 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI (Optional)
-    if: |
-      github.event_name == 'push' ||
-      (github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi')
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
     needs: build
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -214,34 +203,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@0ab0b79471669eb3a4d647e625009c62f9f3b241  # v1.10.1
         with:
           repository-url: https://test.pypi.org/legacy/
-
-      - name: Comment on commit
-        if: github.event_name == 'push'
-        env:
-          VERSION: ${{ needs.build.outputs.version }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
-        continue-on-error: true
-        with:
-          script: |
-            const version = process.env.VERSION;
-            const message = `🚀 Published development version \`${version}\` to [TestPyPI](https://test.pypi.org/project/sphinx-autodoc-toml/${version}/)
-
-            Install with:
-            \`\`\`bash
-            pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sphinx-autodoc-toml==${version}
-            \`\`\``;
-
-            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha
-            });
-
-            if (prs.length > 0) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prs[0].number,
-                body: message
-              });
-            }

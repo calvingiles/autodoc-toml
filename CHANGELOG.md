@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.2] - 2025-11-08
+
+### Changed
+- TestPyPI publishing is now optional and only runs on manual workflow dispatch
+- Removed automatic TestPyPI publishing on main branch pushes to prevent blocking PyPI releases
+- Updated release documentation to reflect manual-only TestPyPI publishing
+
 ## [0.1.1] - 2025-11-08
 
 ### Added
@@ -45,5 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-[Unreleased]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.0...v0.1.1

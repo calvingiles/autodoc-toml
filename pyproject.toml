@@ -29,7 +29,7 @@ build-backend = "uv_build"
 #:    :status: implemented
 [project]
 name = "sphinx-autodoc-toml"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Sphinx extension for documenting TOML configuration files with embedded directives"
 readme = "README.md"
 requires-python = ">=3.8"

@@ -10,7 +10,7 @@ The project uses GitHub Actions with **Trusted Publishing** to automatically pub
 
 The publish workflow (`.github/workflows/publish.yml`) is triggered by:
 
-1. **Push to main branch** → Publishes dev version to TestPyPI
+1. **Push to main branch** → Builds and tests the package (no publication)
 2. **GitHub Release** → Publishes stable version to PyPI
 3. **Manual workflow dispatch** → Publish to either PyPI or TestPyPI
 
@@ -30,7 +30,9 @@ Before the workflow can publish to PyPI, you must configure Trusted Publishing f
    - **Environment name**: `pypi`
 4. Click "Add"
 
-### 2. Configure TestPyPI Trusted Publishing
+### 2. Configure TestPyPI Trusted Publishing (Optional)
+
+TestPyPI publishing is optional and only needed for manual testing of the release workflow.
 
 1. Go to https://test.pypi.org/manage/account/publishing/
 2. Scroll to "Add a new pending publisher"
@@ -56,15 +58,20 @@ For additional protection, configure GitHub environments:
 
 ## Release Types
 
-### Development Releases (Automatic)
+### Development Releases (Manual)
 
-Every push to the `main` branch automatically:
+To test the package before a stable release, you can manually publish to TestPyPI:
 
-1. Runs tests and linters
-2. Creates a dev version: `{base_version}.dev{commit_count}+{short_hash}`
+1. Go to Actions → Publish
+2. Click "Run workflow"
+3. Select target: `testpypi`
+4. Click "Run workflow"
+
+This will:
+1. Run tests and linters
+2. Create a dev version: `{base_version}.dev{commit_count}+{short_hash}`
    - Example: `0.1.0.dev42+a1b2c3d`
-3. Publishes to TestPyPI
-4. Comments on associated PR with installation instructions
+3. Publish to TestPyPI
 
 **Install a dev version:**
 
