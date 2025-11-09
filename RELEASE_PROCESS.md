@@ -4,10 +4,10 @@ This document describes the release process for sphinx-autodoc-toml, based on [s
 
 ## Overview
 
-The release workflow divides responsibilities between the developer, automation, and CI/CD:
+The release workflow uses a label-based trigger pattern inspired by spec-check:
 
-- **Developer**: Prepares release, creates PR with release branch, merges after approval
-- **Automation (GitHub Actions)**: Creates GitHub release, publishes to PyPI
+- **Developer**: Prepares release, creates PR with 'release' label, merges after approval
+- **Automation (GitHub Actions)**: Detects merged PR with 'release' label, creates GitHub release, builds and publishes to PyPI
 - **CI/CD**: Runs tests, linters, and builds package before publishing
 
 ## Roles and Responsibilities
@@ -16,16 +16,19 @@ The release workflow divides responsibilities between the developer, automation,
 1. Confirm target version number
 2. Update `pyproject.toml` version
 3. Update `CHANGELOG.md`
-4. Create release branch and PR
+4. Create release PR with 'release' label
 5. Review CI results
 6. Merge PR after approval
 
 ### Automation Responsibilities
-1. Detect release PR merge
-2. Create GitHub release with version tag
+1. Detect merged PR with 'release' label
+2. Extract version from `pyproject.toml`
 3. Extract release notes from CHANGELOG.md
-4. Publish to PyPI using trusted publishing
-5. Mark pre-releases appropriately
+4. Create GitHub release with version tag
+5. Build package and run tests
+6. Publish to PyPI using trusted publishing
+7. Mark pre-releases appropriately
+8. Comment on PR with release and installation links
 
 ## Step-by-Step Release Process
 
@@ -69,12 +72,14 @@ grep -A 5 "## \[Unreleased\]" CHANGELOG.md
 ### 3. Create Release Branch
 
 ```bash
-# Create release branch
+# Create release branch (can use any name, but release/* is conventional)
 git checkout -b release/v0.2.0
 
 # Replace 0.2.0 with your target version
 VERSION="0.2.0"
 ```
+
+**Note**: The branch name doesn't have to follow a specific pattern. The workflow triggers on the 'release' label, not the branch name.
 
 ### 4. Update Version in pyproject.toml
 
@@ -160,7 +165,9 @@ git commit -m "Bump version to $VERSION"
 git push -u origin release/v$VERSION
 ```
 
-### 7. Create Pull Request
+### 7. Create Pull Request with 'release' Label
+
+**IMPORTANT**: The PR MUST have the 'release' label for the automation to trigger.
 
 Create a PR using the GitHub CLI or web interface:
 
@@ -168,6 +175,7 @@ Create a PR using the GitHub CLI or web interface:
 # Using GitHub CLI
 gh pr create \
   --title "Release $VERSION" \
+  --label "release" \
   --body "$(cat <<EOF
 ## Release $VERSION
 
@@ -188,7 +196,9 @@ EOF
 )"
 ```
 
-Or via the GitHub web interface - create a PR from `release/v$VERSION` to `main`.
+Or via the GitHub web interface:
+1. Create a PR from `release/v$VERSION` to `main`
+2. **Add the 'release' label** to the PR (critical step!)
 
 ### 8. Review CI Results
 

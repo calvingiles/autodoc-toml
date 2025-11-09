@@ -1,18 +1,15 @@
-# GitHub Actions workflow for automatic release creation.
+# GitHub Actions workflow for manual release creation.
 #
-# This workflow implements automated GitHub release creation when a release
-# branch is merged to main. It follows the spec-check release process.
+# DEPRECATED: This workflow is deprecated in favor of create-release.yml which
+# triggers on PR merges with 'release' label (spec-check pattern).
+#
+# This workflow is kept for emergency manual releases only.
 #
 # .. spec:: The release workflow MUST automatically create GitHub releases on release PR merges.
 #    :id: S_RELEASE_008
-#    :status: implemented
+#    :status: deprecated
 #    :tags: release, ci-cd, automation
 #    :links: R_DX_024
-#
-# When a PR from a release/vX.Y.Z branch is merged to main, this workflow
-# extracts the version from pyproject.toml and release notes from CHANGELOG.md,
-# then creates a GitHub release. The publish.yml workflow then triggers on the
-# release to publish to PyPI.
 #
 # .. spec:: Release notes MUST be extracted from CHANGELOG.md for GitHub releases.
 #    :id: S_RELEASE_009
@@ -20,22 +17,14 @@
 #    :tags: release, documentation, automation
 #    :links: R_DX_025
 #
-# The workflow parses CHANGELOG.md to extract the section for the version being
-# released, which becomes the release notes in the GitHub release.
-#
 # .. spec:: Actions MUST be pinned to specific commit SHAs for security.
 #    :id: S_RELEASE_010
 #    :status: implemented
 #    :tags: security, supply-chain
-#
-# Actions are pinned to full commit SHAs to prevent supply chain attacks.
-# To update: Visit the action's repo, find the release tag, copy the commit SHA.
 
-name: Create Release
+name: Create Release (Manual)
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
     inputs:
       version:

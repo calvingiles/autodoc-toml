@@ -1,16 +1,16 @@
-# GitHub Actions workflow for publishing to PyPI and TestPyPI.
+# GitHub Actions workflow for development builds and manual TestPyPI publishing.
 #
-# This workflow implements automated package publishing with quality gates
-# and development version support.
+# This workflow builds and publishes development versions on every push to main,
+# and supports manual TestPyPI publishing for testing.
 #
-# .. spec:: The publish workflow MUST automatically publish to PyPI on GitHub releases.
+# NOTE: Production releases are handled by create-release.yml which is triggered
+# by merging a PR with the 'release' label.
+#
+# .. spec:: The publish workflow MUST automatically publish dev versions on push to main.
 #    :id: S_RELEASE_001
 #    :status: implemented
-#    :tags: release, ci-cd, pypi, automation
+#    :tags: release, ci-cd, development, automation
 #    :links: R_DX_016
-#
-# When a GitHub Release is published, this workflow builds the package, runs
-# all tests and linters, and publishes to PyPI using trusted publishing.
 #
 # .. spec:: The publish workflow MUST use OIDC-based trusted publishing for PyPI authentication.
 #    :id: S_RELEASE_002
@@ -69,8 +69,6 @@ name: Publish
 on:
   push:
     branches: [ main ]
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       target:
@@ -158,9 +156,9 @@ jobs:
           path: dist/
 
   publish-to-pypi:
-    name: Publish to PyPI
+    name: Publish to PyPI (Dev Builds)
     if: |
-      (github.event_name == 'release' && github.event.action == 'published') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
     needs: build
     runs-on: ubuntu-latest
