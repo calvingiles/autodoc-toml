@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [0.1.3] - 2025-11-09
+
+### Fixed
+- Release workflow now properly triggers on PR merge with 'release' label
+- Consolidated release creation, building, and PyPI publishing into single workflow
+- Updated release process documentation to reflect label-based workflow pattern
+
 ## [0.1.2] - 2025-11-08
 
 ### Changed
@@ -52,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-[Unreleased]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/calvingiles/autodoc-toml/compare/v0.1.0...v0.1.1
