@@ -1,47 +1,4 @@
-"""Sphinx extension for autodoc-toml directive.
-
-.. spec:: The extension MUST provide an autodoc-toml directive for Sphinx.
-   :id: S_EXT_001
-   :status: implemented
-   :tags: sphinx, directive
-   :links: R_SPHINX_001
-
-.. spec:: The autodoc-toml directive MUST accept a file path argument.
-   :id: S_EXT_002
-   :status: implemented
-   :tags: sphinx, directive
-   :links: R_SPHINX_002
-
-.. spec:: The extension MUST resolve both relative and absolute file paths.
-   :id: S_EXT_003
-   :status: implemented
-   :tags: sphinx, paths
-   :links: R_SPHINX_003
-
-.. spec:: The extension MUST generate proper docutils nodes from doc-comments.
-   :id: S_EXT_004
-   :status: implemented
-   :tags: sphinx, generation
-   :links: R_SPHINX_004
-
-.. spec:: The extension MUST use nested_parse to support embedded Sphinx directives.
-   :id: S_EXT_005
-   :status: implemented
-   :tags: sphinx, directives
-   :links: R_SPHINX_005
-
-.. spec:: The extension MUST log clear warnings and errors for invalid files.
-   :id: S_EXT_006
-   :status: implemented
-   :tags: sphinx, error-handling
-   :links: R_SPHINX_006
-
-.. spec:: The extension MUST display TOML content in collapsible admonitions.
-   :id: S_EXT_007
-   :status: implemented
-   :tags: sphinx, ui
-   :links: R_SPHINX_007
-"""
+"""Sphinx extension for autodoc-toml directive."""
 
 from pathlib import Path
 from typing import Any, Dict, List
@@ -60,6 +17,12 @@ logger = logging.getLogger(__name__)
 class AutodocTomlDirective(Directive):
     """
     Directive to automatically document TOML files with embedded doc-comments.
+
+    .. spec:: The extension MUST provide an autodoc-toml directive for Sphinx.
+       :id: S_EXT_001
+       :status: implemented
+       :tags: sphinx, directive
+       :links: R_SPHINX_001
 
     Usage:
         .. autodoc-toml:: path/to/file.toml
@@ -80,6 +43,24 @@ class AutodocTomlDirective(Directive):
     def run(self) -> List[nodes.Node]:
         """
         Execute the directive.
+
+        .. spec:: The autodoc-toml directive MUST accept a file path argument.
+           :id: S_EXT_002
+           :status: implemented
+           :tags: sphinx, directive
+           :links: R_SPHINX_002
+
+        .. spec:: The extension MUST resolve both relative and absolute file paths.
+           :id: S_EXT_003
+           :status: implemented
+           :tags: sphinx, paths
+           :links: R_SPHINX_003
+
+        .. spec:: The extension MUST log clear warnings and errors for invalid files.
+           :id: S_EXT_006
+           :status: implemented
+           :tags: sphinx, error-handling
+           :links: R_SPHINX_006
 
         Returns:
             List of docutils nodes to insert into the document
@@ -136,6 +117,24 @@ class AutodocTomlDirective(Directive):
     ) -> List[nodes.Node]:
         """
         Create documentation nodes for a single doc-comment.
+
+        .. spec:: The extension MUST generate proper docutils nodes from doc-comments.
+           :id: S_EXT_004
+           :status: implemented
+           :tags: sphinx, generation
+           :links: R_SPHINX_004
+
+        .. spec:: The extension MUST use nested_parse to support embedded Sphinx directives.
+           :id: S_EXT_005
+           :status: implemented
+           :tags: sphinx, directives
+           :links: R_SPHINX_005
+
+        .. spec:: The extension MUST display TOML content in collapsible admonitions.
+           :id: S_EXT_007
+           :status: implemented
+           :tags: sphinx, ui
+           :links: R_SPHINX_007
 
         Args:
             doc_comment: The DocComment object

@@ -1,29 +1,4 @@
-"""Linter and formatter for TOML-Doc specification compliance.
-
-.. spec:: The linter tool MUST validate TOML-Doc specification compliance.
-   :id: S_LINT_001
-   :status: planned
-   :tags: linter, validation
-   :links: R_LINT_001
-
-.. spec:: The linter MUST check for Separator Rule violations.
-   :id: S_LINT_003
-   :status: planned
-   :tags: linter, validation
-   :links: R_LINT_002
-
-.. spec:: The linter MUST check for Attachment Rule violations.
-   :id: S_LINT_004
-   :status: planned
-   :tags: linter, validation
-   :links: R_LINT_003
-
-.. spec:: The linter MUST provide auto-formatting to fix spec violations.
-   :id: S_LINT_005
-   :status: planned
-   :tags: linter, formatting
-   :links: R_LINT_004
-"""
+"""Linter and formatter for TOML-Doc specification compliance."""
 
 import argparse
 import sys
@@ -54,6 +29,24 @@ class TomlDocLinter:
         """
         Lint the TOML file for TOML-Doc specification compliance.
 
+        .. spec:: The linter tool MUST validate TOML-Doc specification compliance.
+           :id: S_LINT_001
+           :status: planned
+           :tags: linter, validation
+           :links: R_LINT_001
+
+        .. spec:: The linter MUST check for Separator Rule violations.
+           :id: S_LINT_003
+           :status: planned
+           :tags: linter, validation
+           :links: R_LINT_002
+
+        .. spec:: The linter MUST check for Attachment Rule violations.
+           :id: S_LINT_004
+           :status: planned
+           :tags: linter, validation
+           :links: R_LINT_003
+
         Returns:
             List of LintError objects
         """
@@ -68,6 +61,12 @@ class TomlDocLinter:
     def format(self) -> str:
         """
         Format the TOML file to comply with TOML-Doc specification.
+
+        .. spec:: The linter MUST provide auto-formatting to fix spec violations.
+           :id: S_LINT_005
+           :status: planned
+           :tags: linter, formatting
+           :links: R_LINT_004
 
         Returns:
             Formatted TOML content

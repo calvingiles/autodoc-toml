@@ -1,65 +1,4 @@
-"""Core parser for extracting doc-comments from TOML files.
-
-.. spec:: The parser MUST recognize doc-comments marked with #: syntax.
-   :id: S_PARSER_001
-   :status: implemented
-   :tags: parser, syntax
-   :links: R_SPEC_001
-
-.. spec:: The parser MUST validate the Separator Rule for doc-comments.
-   :id: S_PARSER_002
-   :status: implemented
-   :tags: parser, validation
-   :links: R_SPEC_002, R_PARSE_003
-
-.. spec:: The parser MUST validate the Attachment Rule for doc-comments.
-   :id: S_PARSER_003
-   :status: implemented
-   :tags: parser, validation
-   :links: R_SPEC_003, R_PARSE_004
-
-.. spec:: The parser MUST support multi-line doc-comments.
-   :id: S_PARSER_004
-   :status: implemented
-   :tags: parser, syntax
-   :links: R_SPEC_004
-
-.. spec:: The parser MUST use tomlkit to preserve comments and whitespace.
-   :id: S_PARSER_005
-   :status: implemented
-   :tags: parser, toml
-   :links: R_PARSE_001
-
-.. spec:: The parser MUST extract all valid doc-comments from a TOML file.
-   :id: S_PARSER_006
-   :status: implemented
-   :tags: parser, extraction
-   :links: R_PARSE_002
-
-.. spec:: The parser MUST identify and parse TOML table headers.
-   :id: S_PARSER_007
-   :status: implemented
-   :tags: parser, toml
-   :links: R_PARSE_005
-
-.. spec:: The parser MUST identify and parse TOML key-value pairs.
-   :id: S_PARSER_008
-   :status: implemented
-   :tags: parser, toml
-   :links: R_PARSE_005
-
-.. spec:: The parser MUST determine hierarchical TOML paths for items.
-   :id: S_PARSER_009
-   :status: implemented
-   :tags: parser, toml, hierarchy
-   :links: R_PARSE_006
-
-.. spec:: The parser MUST extract TOML content for documented items.
-   :id: S_PARSER_010
-   :status: implemented
-   :tags: parser, extraction
-   :links: R_PARSE_007
-"""
+"""Core parser for extracting doc-comments from TOML files."""
 
 import re
 from pathlib import Path
@@ -114,6 +53,12 @@ class TomlDocParser:
         """
         Initialize the parser.
 
+        .. spec:: The parser MUST use tomlkit to preserve comments and whitespace.
+           :id: S_PARSER_005
+           :status: implemented
+           :tags: parser, toml
+           :links: R_PARSE_001
+
         Args:
             toml_path: Path to the TOML file to parse
         """
@@ -126,6 +71,12 @@ class TomlDocParser:
     def parse(self) -> List[DocComment]:
         """
         Parse the TOML file and extract all valid doc-comments.
+
+        .. spec:: The parser MUST extract all valid doc-comments from a TOML file.
+           :id: S_PARSER_006
+           :status: implemented
+           :tags: parser, extraction
+           :links: R_PARSE_002
 
         Returns:
             List of DocComment objects
@@ -154,6 +105,18 @@ class TomlDocParser:
     def _extract_doc_comment_block(self, start_line: int) -> Optional[DocComment]:
         """
         Extract a doc-comment block starting at the given line.
+
+        .. spec:: The parser MUST recognize doc-comments marked with #: syntax.
+           :id: S_PARSER_001
+           :status: implemented
+           :tags: parser, syntax
+           :links: R_SPEC_001
+
+        .. spec:: The parser MUST support multi-line doc-comments.
+           :id: S_PARSER_004
+           :status: implemented
+           :tags: parser, syntax
+           :links: R_SPEC_004
 
         Args:
             start_line: The line index where the doc-comment starts (0-indexed)
@@ -209,6 +172,12 @@ class TomlDocParser:
         """
         Check the Separator Rule: doc-comment must be preceded by empty line.
 
+        .. spec:: The parser MUST validate the Separator Rule for doc-comments.
+           :id: S_PARSER_002
+           :status: implemented
+           :tags: parser, validation
+           :links: R_SPEC_002, R_PARSE_003
+
         Args:
             doc_start_line: The line index where the doc-comment starts
 
@@ -236,6 +205,12 @@ class TomlDocParser:
     def _check_attachment_rule(self, doc_end_line: int, item_line: int) -> bool:
         """
         Check the Attachment Rule: no empty lines between doc-comment and item.
+
+        .. spec:: The parser MUST validate the Attachment Rule for doc-comments.
+           :id: S_PARSER_003
+           :status: implemented
+           :tags: parser, validation
+           :links: R_SPEC_003, R_PARSE_004
 
         Args:
             doc_end_line: The line index where the doc-comment ends
@@ -284,6 +259,18 @@ class TomlDocParser:
         """
         Get the TOML path for an item at the given line.
 
+        .. spec:: The parser MUST identify and parse TOML table headers.
+           :id: S_PARSER_007
+           :status: implemented
+           :tags: parser, toml
+           :links: R_PARSE_005
+
+        .. spec:: The parser MUST identify and parse TOML key-value pairs.
+           :id: S_PARSER_008
+           :status: implemented
+           :tags: parser, toml
+           :links: R_PARSE_005
+
         Args:
             line_idx: The line index of the TOML item
 
@@ -315,6 +302,12 @@ class TomlDocParser:
         """
         Find the table context for a line by looking backwards.
 
+        .. spec:: The parser MUST determine hierarchical TOML paths for items.
+           :id: S_PARSER_009
+           :status: implemented
+           :tags: parser, toml, hierarchy
+           :links: R_PARSE_006
+
         Args:
             line_idx: The line index to find the table context for
 
@@ -335,6 +328,12 @@ class TomlDocParser:
     def _extract_toml_content(self, path: List[str]) -> str:
         """
         Extract the TOML content for a given path.
+
+        .. spec:: The parser MUST extract TOML content for documented items.
+           :id: S_PARSER_010
+           :status: implemented
+           :tags: parser, extraction
+           :links: R_PARSE_007
 
         Args:
             path: The path to the TOML item (e.g., ["project", "dependencies"])
